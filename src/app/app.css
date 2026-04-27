@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap');
+
+/* الغلاف العام */
+.spark-wrapper { background-color: #f4f0f7; color: #2c3e50; font-family: 'Cairo', 'Segoe UI', sans-serif; min-height: 100vh; margin: -8px; padding-bottom: 50px; direction: rtl; transition: background 0.5s; }
+
+/* 🌟 ستايل الـ VIP الذهبي الملكي 🌟 */
+.spark-wrapper.vip-theme {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+  color: #fff;
+}
+.vip-theme .sport-card, .vip-theme .table-container, .vip-theme .custom-modal {
+  background: #252525;
+  border-top: 6px solid #f1c40f;
+  box-shadow: 0 15px 35px rgba(241, 196, 15, 0.15);
+  color: #fff;
+}
+.vip-theme .card-title, .vip-theme .id-cell { color: #f1c40f !important; text-shadow: 0 0 10px rgba(241, 196, 15, 0.3); }
+.vip-theme .sport-input { background: #333; color: #fff; border-color: #444; }
+.vip-theme .sport-table th { background: linear-gradient(90deg, #d4ac0d, #f1c40f); color: #111; }
+.vip-theme .sport-table td { color: #fff; border-bottom: 1px solid #444; }
+.vip-theme .sport-table tr:hover td { background: #2f2f2f; }
+
+/* البوب أب والدخول */
+.custom-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.custom-modal { background: #fff; padding: 40px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+.login-container { display: flex; justify-content: center; align-items: center; min-height: 90vh; }
+.login-card { text-align: center; padding: 50px 40px; }
+.login-logo { width: 120px; height: 120px; border-radius: 50%; border: 4px solid #f1c40f; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(107, 44, 145, 0.2); }
+
+/* الشريط العلوي */
+.top-navbar { background: linear-gradient(90deg, #51206e 0%, #6b2c91 100%); padding: 15px 40px; display: flex; align-items: center; justify-content: center; gap: 20px; box-shadow: 0 4px 20px rgba(107, 44, 145, 0.4); border-bottom: 4px solid #f1c40f; position: relative; z-index: 10; }
+.nav-logo { height: 70px; border-radius: 12px; border: 3px solid #f1c40f; background: white; padding: 2px; }
+.nav-title { color: #ffffff; margin: 0; font-size: 2.5em; font-weight: 900; letter-spacing: 1px; }
+.nav-subtitle { color: #f1c40f; margin: 0; font-size: 1.3em; font-weight: 800; }
+
+/* 🌟 تخطيط الـ Dashboard (Sidebar + Main) 🌟 */
+.dashboard-layout { display: flex; max-width: 1400px; margin: 0 auto; padding: 20px; gap: 30px; align-items: flex-start; }
+@media (max-width: 900px) { .dashboard-layout { flex-direction: column; } .sidebar { width: 100% !important; } }
+
+/* الشريط الجانبي (Sidebar) */
+.sidebar { width: 250px; display: flex; flex-direction: column; gap: 15px; flex-shrink: 0; }
+.sidebar-btn { padding: 18px; border: none; border-radius: 12px; font-size: 1.2em; font-weight: 900; cursor: pointer; text-align: right; transition: all 0.3s; background: #fff; color: #2c3e50; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.sidebar-btn:hover { transform: translateX(-5px); background: #f0e6f5; }
+.active-tab { background: #6b2c91 !important; color: #fff !important; box-shadow: 0 5px 15px rgba(107, 44, 145, 0.3); }
+.vip-btn { background: #fffdf0; border: 1px solid #f1c40f; }
+.active-vip-tab { background: linear-gradient(90deg, #d4ac0d, #f1c40f) !important; color: #111 !important; box-shadow: 0 5px 15px rgba(241, 196, 15, 0.3); border: none; }
+
+/* المحتوى الرئيسي */
+.main-content { flex: 1; width: 100%; }
+.cards-flexbox { display: flex; justify-content: center; flex-wrap: wrap; gap: 30px; }
+.sport-card { background: #ffffff; padding: 35px 30px; border-radius: 20px; width: 100%; max-width: 420px; box-sizing: border-box; box-shadow: 0 10px 25px rgba(107, 44, 145, 0.08); border-top: 6px solid #6b2c91; position: relative; }
+.campaign-card { border-top: 6px solid #f1c40f; }
+.card-title { color: #6b2c91; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; margin-top: 0; margin-bottom: 25px; font-weight: 900; text-align: center; font-size: 1.5em;}
+.camp-title { color: #d4ac0d; }
+
+/* 🌟 شيك بوكس الـ VIP */
+.vip-checkbox-label { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; cursor: pointer; padding: 10px; background: #fffdf0; border: 1px dashed #f1c40f; border-radius: 8px; }
+.vip-checkbox-label input { width: 20px; height: 20px; cursor: pointer; accent-color: #f1c40f; }
+.vip-text { font-weight: 900; color: #d4ac0d; font-size: 1.1em; }
+
+/* المربعات */
+.sport-input { width: 100%; padding: 14px; margin-bottom: 15px; background-color: #f8f9fc; border: 2px solid transparent; color: inherit; border-radius: 12px; box-sizing: border-box; font-size: 15px; font-family: inherit; font-weight: 800; transition: all 0.3s; }
+.sport-input:focus { outline: none; border-color: #6b2c91; background-color: transparent; }
+
+/* الأزرار 3D */
+.btn-main { width: 100%; padding: 15px; border: none; border-radius: 12px; cursor: pointer; font-size: 17px; font-weight: 900; transition: all 0.1s; text-transform: uppercase;}
+.btn-purple { background-color: #6b2c91; color: #ffffff; border-bottom: 5px solid #4a1f66; }
+.btn-purple:active { transform: translateY(5px); border-bottom: 0px; margin-bottom: 5px; }
+.btn-yellow { background-color: #f1c40f; color: #111; border-bottom: 5px solid #c29d0b; }
+.btn-yellow:active { transform: translateY(5px); border-bottom: 0px; margin-bottom: 5px; }
+.btn-gold { background: linear-gradient(90deg, #d4ac0d, #f1c40f); color: #111; border-bottom: 5px solid #a38308; }
+.btn-gold:active { transform: translateY(5px); border-bottom: 0px; margin-bottom: 5px; }
+.btn-cancel { background-color: #e0e4e8; color: #555; border-bottom: 5px solid #bdc3c7; margin-top: 10px; }
+.btn-cancel:active { transform: translateY(5px); border-bottom: 0px; margin-bottom: 5px; }
+.btn-del { background-color: #e74c3c; color: white; border-bottom: 4px solid #c0392b; }
+.btn-del:active { transform: translateY(4px); border-bottom: 0px; margin-bottom: 4px; }
+
+/* الجدول والبحث والتقسيم */
+.table-container { background: #ffffff; padding: 30px; border-radius: 20px; margin-top: 30px; box-shadow: 0 15px 35px rgba(107, 44, 145, 0.08); overflow-x: auto; }
+.table-header-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+.search-box { flex: 1; max-width: 350px; }
+.search-input { margin: 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 50px; padding: 12px 20px; }
+.search-input:focus { border-color: #6b2c91; }
+
+.sport-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: center; min-width: 650px; }
+.sport-table th { background-color: #6b2c91; color: #ffffff; padding: 18px; font-weight: 900; }
+.sport-table th:first-child { border-top-right-radius: 12px; }
+.sport-table th:last-child { border-top-left-radius: 12px; }
+.sport-table td { padding: 16px; border-bottom: 1px solid #f0f0f0; font-weight: 800; }
+.id-cell { color: #6b2c91; font-size: 1.2em; font-weight: 900 !important; }
+
+/* أزرار الجدول */
+.action-group { display: flex; justify-content: center; gap: 8px; }
+.btn-action { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 900; color: white; transition: 0.1s; }
+.btn-wa { background-color: #25D366; border-bottom: 4px solid #1da851; }
+.btn-wa:active { transform: translateY(4px); border-bottom: 0; margin-bottom: 4px; }
+.btn-edit { background-color: #f1c40f; color: #111; border-bottom: 4px solid #c29d0b; }
+.btn-edit:active { transform: translateY(4px); border-bottom: 0; margin-bottom: 4px; }
+
+/* 🌟 أزرار التقسيم */
+.pagination-controls { display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 30px; }
+.page-btn { background: #6b2c91; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 900; cursor: pointer; border-bottom: 4px solid #4a1f66; transition: 0.1s; }
+.page-btn:active { transform: translateY(4px); border-bottom: 0; margin-bottom: 4px; }
+.page-btn:disabled { background: #ccc; border-bottom-color: #999; cursor: not-allowed; transform: none !important; margin-bottom: 0 !important; border-bottom: 4px solid #999 !important;}
+.page-info { font-weight: 900; color: #2c3e50; font-size: 1.1em; }
+.vip-theme .page-info { color: #f1c40f; }
+.vip-theme .page-btn { background: linear-gradient(90deg, #d4ac0d, #f1c40f); color: #111; border-bottom-color: #a38308; }

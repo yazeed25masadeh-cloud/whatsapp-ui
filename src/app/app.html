@@ -1,0 +1,146 @@
+<div class="spark-wrapper" [class.vip-theme]="activeTab === 'vip'">
+
+  @if (showAlert) {
+    <div class="custom-overlay">
+      <div class="custom-modal">
+        <h3 [style.color]="activeTab === 'vip' ? '#f1c40f' : '#6b2c91'" style="margin-top: 0;">⚡ تنبيه</h3>
+        <p style="font-size: 1.2em; font-weight: bold;">{{ alertMessage }}</p>
+        <button (click)="closeAlert()" class="btn-main" [ngClass]="activeTab === 'vip' ? 'btn-gold' : 'btn-purple'" style="width: 50%; margin-top: 20px;">تمام</button>
+      </div>
+    </div>
+  }
+
+  @if (showConfirm) {
+    <div class="custom-overlay">
+      <div class="custom-modal">
+        <h3 style="color: #e74c3c; margin-top: 0;">⚠️ سؤال مهم</h3>
+        <p style="font-size: 1.2em; font-weight: bold;">{{ confirmMessage }}</p>
+        <div style="display: flex; gap: 15px; margin-top: 25px;">
+          <button (click)="confirmDelete()" class="btn-main btn-del" style="margin: 0;">متأكد، امسح!</button>
+          <button (click)="cancelDelete()" class="btn-main btn-cancel" style="margin: 0;">لا، تراجع</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (!isLoggedIn) {
+    <div class="login-container">
+      <div class="sport-card login-card">
+        <img src="logo.jpg" alt="SPARK SPORT" class="login-logo" onerror="this.src='assets/logo.jpg'">
+        <h2 style="color: #6b2c91; margin-bottom: 5px;">تسجيل الدخول</h2>
+        <p style="color: #7f8c8d; margin-bottom: 25px;">الرجاء إدخال بياناتك للوصول للنظام</p>
+        <input type="text" [(ngModel)]="loginUser" placeholder="اسم المستخدم" class="sport-input" style="text-align: center;">
+        <input type="password" [(ngModel)]="loginPass" placeholder="كلمة المرور" class="sport-input" style="text-align: center;">
+        <button (click)="doLogin()" class="btn-main btn-yellow" style="margin-top: 15px;">دخول ⚡</button>
+      </div>
+    </div>
+  } 
+  
+  @else {
+    <div class="top-navbar">
+      <img src="logo.jpg" alt="SPARK SPORT" class="nav-logo" onerror="this.src='assets/logo.jpg'">
+      <div>
+        <h1 class="nav-title">SPARK SPORT</h1>
+        <p class="nav-subtitle">نظام الإدارة التسويقية</p>
+      </div>
+      <button (click)="doLogout()" class="btn-main btn-cancel" style="width: auto; padding: 10px 20px; position: absolute; left: 40px; margin: 0;">تسجيل خروج 🔒</button>
+    </div>
+
+    <div class="dashboard-layout">
+      
+      <div class="sidebar">
+        <button (click)="switchTab('all')" class="sidebar-btn" [class.active-tab]="activeTab === 'all'">
+          👥 جميع الزبائن
+        </button>
+        <button (click)="switchTab('vip')" class="sidebar-btn vip-btn" [class.active-vip-tab]="activeTab === 'vip'">
+          ⭐ الزبائن المميزين
+        </button>
+      </div>
+
+      <div class="main-content">
+        <div class="cards-flexbox">
+          
+          <div class="sport-card">
+            <h3 class="card-title">
+              {{ editingCustomerId ? '✏️ تعديل بيانات الزبون' : '👤 إضافة زبون جديد' }}
+            </h3>
+            <input type="text" [(ngModel)]="customerName" placeholder="اسم الزبون" class="sport-input">
+            <input type="text" [(ngModel)]="customerPhone" placeholder="رقم الهاتف (مثل 079...)" class="sport-input">
+            
+            <label class="vip-checkbox-label">
+              <input type="checkbox" [(ngModel)]="isVIP"> 
+              <span class="vip-text">⭐ تصنيف كزبون مميز (VIP)</span>
+            </label>
+
+            <button (click)="saveCustomer()" class="btn-main" [ngClass]="editingCustomerId ? 'btn-yellow' : (activeTab === 'vip' ? 'btn-gold' : 'btn-purple')">
+              {{ editingCustomerId ? 'تحديث البيانات' : 'حفظ' }}
+            </button>
+            @if (editingCustomerId) {
+              <button (click)="cancelEdit()" class="btn-main btn-cancel">إلغاء التعديل</button>
+            }
+          </div>
+
+          <div class="sport-card campaign-card">
+            <h3 class="card-title camp-title">🚀 إرسال للكل</h3>
+            <input type="text" [(ngModel)]="campName" placeholder="اسم المنتج (مثال: حذاء رياضي)" class="sport-input">
+            <input type="text" [(ngModel)]="campPrice" placeholder="السعر (مثلا: 25 دينار)" class="sport-input">
+            <textarea [(ngModel)]="campDesc" placeholder="وصف المنتج..." rows="2" class="sport-input" style="resize: none;"></textarea>
+            <input type="text" [(ngModel)]="campImageLink" placeholder="رابط صورة المنتج" class="sport-input">
+            <button (click)="sendBulkWhatsApp()" class="btn-main btn-yellow">
+  إرسال للزبون رقم ({{ currentCustomerIndex + 1 }}) من أصل ({{ targetCustomersCount }}) 💬
+</button>
+          </div>
+
+        </div>
+
+        <div class="table-container">
+          <div class="table-header-controls">
+            <h3 class="card-title" style="margin: 0; border: none; font-size: 24px;">
+              {{ activeTab === 'vip' ? '⭐ قائمة الزبائن المميزين ⭐' : '👥 جميع الزبائن' }}
+            </h3>
+            
+            <div class="search-box">
+              <input type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()" placeholder="🔍 ابحث برقم الهاتف..." class="sport-input search-input">
+            </div>
+          </div>
+
+          <table class="sport-table">
+            <thead>
+              <tr><th>#</th><th>الاسم</th><th>رقم الهاتف</th><th>إجراء سريع</th></tr>
+            </thead>
+            <tbody>
+              @for (customer of processedCustomers; track customer.id; let i = $index) {
+                <tr>
+                  <td class="id-cell">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+                  <td>
+                    {{ customer.name }}
+                    @if (customer.isVIP) { <span title="زبون مميز" style="color: gold; margin-right: 5px;">⭐</span> }
+                  </td>
+                  <td>{{ customer.phoneNumber }}</td>
+                  <td>
+                    <div class="action-group">
+                      <button (click)="sendSingleWhatsApp(customer)" class="btn-action btn-wa">💬 مراسلة</button>
+                      <button (click)="editCustomer(customer)" class="btn-action btn-edit">✏️ تعديل</button>
+                      <button (click)="askDelete(customer.id)" class="btn-action btn-del">🗑️ حذف</button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" style="color: #6b2c91; font-weight: bold; padding: 30px;">لا يوجد زبائن مطابقين للبحث!</td></tr>
+              }
+            </tbody>
+          </table>
+
+          @if (totalPages > 1) {
+            <div class="pagination-controls">
+              <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="page-btn">التالي ◀</button>
+              <span class="page-info">صفحة <strong>{{ currentPage }}</strong> من <strong>{{ totalPages }}</strong></span>
+              <button (click)="prevPage()" [disabled]="currentPage === 1" class="page-btn">▶ السابق</button>
+            </div>
+          }
+
+        </div>
+      </div>
+    </div>
+  }
+</div>
