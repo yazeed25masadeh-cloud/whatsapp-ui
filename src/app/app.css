@@ -105,3 +105,84 @@
 .page-info { font-weight: 900; color: #2c3e50; font-size: 1.1em; }
 .vip-theme .page-info { color: #f1c40f; }
 .vip-theme .page-btn { background: linear-gradient(90deg, #d4ac0d, #f1c40f); color: #111; border-bottom-color: #a38308; }
+/* =========================================
+   📱 تعديلات الموبايل (Responsive Design)
+   ========================================= */
+@media screen and (max-width: 768px) {
+  
+  /* 1. ترتيب الهيدر (الشريط العلوي) */
+  .top-navbar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 15px 10px !important;
+    position: relative;
+    gap: 10px;
+  }
+
+  /* فك التعليق عن زر تسجيل الخروج عشان ينزل تحت اللوجو */
+  .top-navbar button {
+    position: relative !important;
+    left: auto !important;
+    width: 100% !important;
+    margin-top: 10px !important;
+  }
+
+  /* 2. ترتيب الواجهة الجانبية والأساسية */
+  .dashboard-layout {
+    flex-direction: column !important;
+  }
+
+  .sidebar {
+    display: flex;
+    flex-direction: row !important;
+    justify-content: space-between;
+    border-right: none !important;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+  }
+
+  .sidebar-btn {
+    width: 48% !important;
+    padding: 10px 5px !important;
+    font-size: 13px !important;
+    text-align: center;
+  }
+
+  /* 3. ترتيب الفلاتر والبحث */
+  .table-header-controls {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  /* 4. حل مشكلة الجدول (إضافة سكرول للجدول لحاله) */
+  .table-container {
+    overflow-x: auto;
+    max-width: 100vw;
+    padding: 10px !important;
+  }
+
+  .sport-table th, .sport-table td {
+    padding: 8px !important;
+    font-size: 13px !important;
+    white-space: nowrap; /* يمنع الكلمة تنزل سطرين */
+  }
+
+  /* ترتيب أزرار (مراسلة، تعديل، حذف) تحت بعض عشان نوفر مساحة بالجدول */
+  .action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .btn-action {
+    width: 100%;
+    margin: 0 !important;
+  }
+}
