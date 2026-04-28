@@ -119,11 +119,11 @@ export class AppComponent implements OnInit {
   }
 
   loadCustomers() {
-    this.http.get<any[]>('https://whatsappsenderapi.onrender.com')
+    // 🚨 تم تعديل رابط عرض الزبائن
+    this.http.get<any[]>('https://whatsappsenderapi.onrender.com/api/customers')
       .subscribe({
         next: (data) => {
           this.customers = data;
-          // 🌟 الضربة الثانية: إجبار الأنجولار يعرض البيانات جوا الجدول فوراً
           this.cdr.detectChanges(); 
         },
         error: (err) => console.error('مشكلة بجلب البيانات', err)
@@ -151,7 +151,8 @@ export class AppComponent implements OnInit {
     };
 
     if (this.editingCustomerId) {
-      this.http.put<any>(`http://localhost:5158/api/customers/${this.editingCustomerId}`, customerData)
+      // 🚨 تم تعديل رابط التعديل
+      this.http.put<any>(`https://whatsappsenderapi.onrender.com/api/customers/${this.editingCustomerId}`, customerData)
         .subscribe({
           next: () => {
             this.loadCustomers(); 
@@ -161,7 +162,8 @@ export class AppComponent implements OnInit {
           error: (err) => console.error(err)
         });
     } else {
-      this.http.post<any>('http://localhost:5158/api/customers', customerData)
+      // 🚨 تم تعديل رابط الحفظ الجديد
+      this.http.post<any>('https://whatsappsenderapi.onrender.com/api/customers', customerData)
         .subscribe({
           next: () => {
             this.loadCustomers(); 
@@ -190,7 +192,8 @@ export class AppComponent implements OnInit {
 
   confirmDelete() {
     if (this.customerToDelete) {
-      this.http.delete(`http://localhost:5158/api/customers/${this.customerToDelete}`)
+      // 🚨 تم تعديل رابط الحذف
+      this.http.delete(`https://whatsappsenderapi.onrender.com/api/customers/${this.customerToDelete}`)
         .subscribe({
           next: () => {
             this.loadCustomers(); 
