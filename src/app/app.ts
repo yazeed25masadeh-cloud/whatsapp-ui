@@ -45,15 +45,21 @@ export class AppComponent implements OnInit {
   confirmMessage: string = '';
   customerToDelete: number | null = null;
 
-  // 🌟 هون استخدمنا الـ cdr اللي رح يجبر الشاشة تتحدث
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    // 🚀 التعديل الأول: صحصحة السيرفر (Ping)
+    // أول ما الموقع يفتح، بنبعث طلب مخفي عشان السيرفر المجاني يصحى من النوم
+    this.http.get('https://whatsappsenderapi.onrender.com/api/customers')
+      .subscribe({
+        next: () => console.log('السيرفر صاحي وجاهز!'),
+        error: () => console.log('جاري إيقاظ السيرفر...')
+      });
+  }
 
   doLogin() {
     if (this.loginUser === this.ADMIN_USER && this.loginPass === this.ADMIN_PASS) {
       this.isLoggedIn = true; 
-      // 🌟 الضربة الأولى: إجبار الأنجولار يعرض واجهة النظام فوراً
       this.cdr.detectChanges(); 
       this.loadCustomers();   
     } else {
@@ -119,7 +125,6 @@ export class AppComponent implements OnInit {
   }
 
   loadCustomers() {
-    // 🚨 تم تعديل رابط عرض الزبائن
     this.http.get<any[]>('https://whatsappsenderapi.onrender.com/api/customers')
       .subscribe({
         next: (data) => {
@@ -144,6 +149,17 @@ export class AppComponent implements OnInit {
       return;
     }
 
+    // 🛑 التعديل الثاني: فحص التكرار عن طريق رقم الهاتف
+    // نتأكد إنه الرقم موجود، وبنفس الوقت نستثني الزبون اللي قاعدين بنعدل عليه
+    const isDuplicate = this.customers.some(
+      c => c.phoneNumber === this.customerPhone && c.id !== this.editingCustomerId
+    );
+
+    if (isDuplicate) {
+      this.triggerAlert('عفواً! هذا الزبون موجود مسبقاً في النظام (نفس رقم الهاتف) ⚠️');
+      return;
+    }
+
     const customerData = { 
       name: this.customerName, 
       phoneNumber: this.customerPhone,
@@ -151,7 +167,6 @@ export class AppComponent implements OnInit {
     };
 
     if (this.editingCustomerId) {
-      // 🚨 تم تعديل رابط التعديل
       this.http.put<any>(`https://whatsappsenderapi.onrender.com/api/customers/${this.editingCustomerId}`, customerData)
         .subscribe({
           next: () => {
@@ -162,7 +177,6 @@ export class AppComponent implements OnInit {
           error: (err) => console.error(err)
         });
     } else {
-      // 🚨 تم تعديل رابط الحفظ الجديد
       this.http.post<any>('https://whatsappsenderapi.onrender.com/api/customers', customerData)
         .subscribe({
           next: () => {
@@ -192,7 +206,6 @@ export class AppComponent implements OnInit {
 
   confirmDelete() {
     if (this.customerToDelete) {
-      // 🚨 تم تعديل رابط الحذف
       this.http.delete(`https://whatsappsenderapi.onrender.com/api/customers/${this.customerToDelete}`)
         .subscribe({
           next: () => {

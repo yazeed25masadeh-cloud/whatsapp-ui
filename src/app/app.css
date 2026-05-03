@@ -1,7 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap');
 
 /* الغلاف العام */
-.spark-wrapper { background-color: #f4f0f7; color: #2c3e50; font-family: 'Cairo', 'Segoe UI', sans-serif; min-height: 100vh; margin: -8px; padding-bottom: 50px; direction: rtl; transition: background 0.5s; }
+.spark-wrapper { 
+  background-color: #f4f0f7;
+  color: #2c3e50; font-family: 'Cairo', 'Segoe UI', sans-serif;
+  min-height: 100vh; margin: -8px;
+  padding-bottom: 50px;
+  direction: rtl; 
+  transition: background 0.5s; 
+}
 
 /* 🌟 ستايل الـ VIP الذهبي الملكي 🌟 */
 .spark-wrapper.vip-theme {
@@ -35,7 +42,7 @@
 
 /* 🌟 تخطيط الـ Dashboard (Sidebar + Main) 🌟 */
 .dashboard-layout { display: flex; max-width: 1400px; margin: 0 auto; padding: 20px; gap: 30px; align-items: flex-start; }
-@media (max-width: 900px) { .dashboard-layout { flex-direction: column; } .sidebar { width: 100% !important; } }
+@media (max-width: 1180px) { .dashboard-layout { flex-direction: column; } .sidebar { width: 100% !important; } }
 
 /* الشريط الجانبي (Sidebar) */
 .sidebar { width: 250px; display: flex; flex-direction: column; gap: 15px; flex-shrink: 0; }
