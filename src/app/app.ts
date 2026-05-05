@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -10,52 +10,89 @@ import { CommonModule } from '@angular/common';
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })
-export class AppComponent implements OnInit {
-  // 🔒 نظام الحماية
+export class AppComponent implements OnInit, OnDestroy {
   isLoggedIn: boolean = false;
   loginUser: string = '';
   loginPass: string = '';
   readonly ADMIN_USER = 'Spark2017';
   readonly ADMIN_PASS = 'WebSite';
 
-  // 📝 متغيرات النظام
   customerName: string = '';
   customerPhone: string = '';
   isVIP: boolean = false; 
   customers: any[] = []; 
   editingCustomerId: number | null = null;
   
-  // 🚀 متغيرات حملة الإرسال
   campName: string = '';
   campPrice: string = '';
   campDesc: string = '';
   campImageLink: string = ''; 
   currentCustomerIndex: number = 0;
 
-  // 🔍 البحث والتقسيم والـ Sidebar
   searchTerm: string = '';
   currentPage: number = 1;
   itemsPerPage: number = 50;
-  activeTab: 'all' | 'vip' = 'all';
+  
+  // 🌟 التعديل: إضافة الشاشات الجديدة للتابات
+  activeTab: 'home' | 'all' | 'vip' | 'stats' = 'home';
 
-  // 🔔 النوافذ المنبثقة
   showAlert: boolean = false;
   alertMessage: string = '';
   showConfirm: boolean = false;
   confirmMessage: string = '';
   customerToDelete: number | null = null;
 
+  // 🕒 متغيرات الوقت والتاريخ
+  currentTime: string = '';
+  currentDate: string = '';
+  clockInterval: any;
+
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    // 🚀 التعديل الأول: صحصحة السيرفر (Ping)
-    // أول ما الموقع يفتح، بنبعث طلب مخفي عشان السيرفر المجاني يصحى من النوم
     this.http.get('https://whatsappsenderapi.onrender.com/api/customers')
       .subscribe({
         next: () => console.log('السيرفر صاحي وجاهز!'),
         error: () => console.log('جاري إيقاظ السيرفر...')
       });
+
+    // 🕒 تشغيل الساعة أول ما يفتح الموقع
+    this.updateClock();
+    this.clockInterval = setInterval(() => this.updateClock(), 1000);
   }
+
+  ngOnDestroy() {
+    if (this.clockInterval) clearInterval(this.clockInterval);
+  }
+
+  // 🕒 دالة تحديث الوقت والتاريخ
+  updateClock() {
+    const now = new Date();
+    const dateOptions: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    this.currentDate = now.toLocaleDateString('ar-JO', dateOptions);
+    this.currentTime = now.toLocaleTimeString('ar-JO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    this.cdr.detectChanges();
+  }
+
+  // 📊 دوال الإحصائيات الذكية
+  get totalCustomersCount() {
+    return this.customers.length;
+  }
+
+  get vipPercentage() {
+    if (this.customers.length === 0) return 0;
+    const vips = this.customers.filter(c => c.isVIP).length;
+    return Math.round((vips / this.customers.length) * 100);
+  }
+
+  get recentCustomers() {
+    return [...this.customers].sort((a, b) => b.id - a.id).slice(0, 5);
+  }
+
+  // 🌐 روابط السوشيال ميديا
+  openFacebook() { window.open('https://web.facebook.com/SparkSportsShop/', '_blank'); }
+  openInstagram() { window.open('https://www.instagram.com/sparksport_jo?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==', '_blank'); }
+  openWhatsAppContact() { window.open('https://wa.me/962787540539', '_blank'); }
 
   doLogin() {
     if (this.loginUser === this.ADMIN_USER && this.loginPass === this.ADMIN_PASS) {
@@ -72,10 +109,11 @@ export class AppComponent implements OnInit {
     this.loginUser = '';
     this.loginPass = '';
     this.customers = []; 
+    this.activeTab = 'home';
     this.cdr.detectChanges();
   }
 
-  switchTab(tab: 'all' | 'vip') {
+  switchTab(tab: 'home' | 'all' | 'vip' | 'stats') {
     this.activeTab = tab;
     this.currentPage = 1; 
     this.currentCustomerIndex = 0;
@@ -88,41 +126,22 @@ export class AppComponent implements OnInit {
 
   get processedCustomers() {
     let filtered = this.customers;
-
-    if (this.activeTab === 'vip') {
-      filtered = filtered.filter(c => c.isVIP === true);
-    }
-
-    if (this.searchTerm.trim() !== '') {
-      filtered = filtered.filter(c => c.phoneNumber.includes(this.searchTerm.trim()));
-    }
-
+    if (this.activeTab === 'vip') filtered = filtered.filter(c => c.isVIP === true);
+    if (this.searchTerm.trim() !== '') filtered = filtered.filter(c => c.phoneNumber.includes(this.searchTerm.trim()));
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     return filtered.slice(startIndex, startIndex + this.itemsPerPage);
   }
 
   get totalPages() {
     let filtered = this.customers;
-    if (this.activeTab === 'vip') {
-      filtered = filtered.filter(c => c.isVIP === true);
-    }
-    if (this.searchTerm.trim() !== '') {
-      filtered = filtered.filter(c => c.phoneNumber.includes(this.searchTerm.trim()));
-    }
+    if (this.activeTab === 'vip') filtered = filtered.filter(c => c.isVIP === true);
+    if (this.searchTerm.trim() !== '') filtered = filtered.filter(c => c.phoneNumber.includes(this.searchTerm.trim()));
     return Math.ceil(filtered.length / this.itemsPerPage) || 1;
   }
 
-  nextPage() {
-    if (this.currentPage < this.totalPages) this.currentPage++;
-  }
-
-  prevPage() {
-    if (this.currentPage > 1) this.currentPage--;
-  }
-
-  onSearchChange() {
-    this.currentPage = 1;
-  }
+  nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; }
+  prevPage() { if (this.currentPage > 1) this.currentPage--; }
+  onSearchChange() { this.currentPage = 1; }
 
   loadCustomers() {
     this.http.get<any[]>('https://whatsappsenderapi.onrender.com/api/customers')
@@ -140,6 +159,11 @@ export class AppComponent implements OnInit {
     this.customerName = customer.name;
     this.customerPhone = customer.phoneNumber;
     this.isVIP = customer.isVIP || false; 
+    
+    // نرجع لتاب 'all' أو 'vip' عشان تبين شاشة التعديل إذا كنا بالإحصائيات
+    if (this.activeTab === 'home' || this.activeTab === 'stats') {
+      this.switchTab('all');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -149,8 +173,6 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    // 🛑 التعديل الثاني: فحص التكرار عن طريق رقم الهاتف
-    // نتأكد إنه الرقم موجود، وبنفس الوقت نستثني الزبون اللي قاعدين بنعدل عليه
     const isDuplicate = this.customers.some(
       c => c.phoneNumber === this.customerPhone && c.id !== this.editingCustomerId
     );

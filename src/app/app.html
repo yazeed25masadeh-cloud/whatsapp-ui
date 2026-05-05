@@ -1,6 +1,5 @@
 <div class="spark-ultimate-wrapper" [class.vip-mode]="activeTab === 'vip'">
 
-  <!-- النوافذ المنبثقة الزجاجية -->
   @if (showAlert) {
     <div class="glass-overlay">
       <div class="glass-modal alert-modal">
@@ -26,14 +25,11 @@
     </div>
   }
 
-  <!-- 🎬 شاشة الدخول السينمائية -->
   @if (!isLoggedIn) {
     <div class="login-viewport">
-      <!-- الخلفية الرياضية -->
       <div class="cinematic-bg"></div>
       <div class="cinematic-overlay"></div>
 
-      <!-- كرت الدخول -->
       <div class="login-glass-card float-anim relative-z">
         <div class="logo-container">
           <div class="logo-ring"></div>
@@ -57,9 +53,7 @@
     </div>
   } 
   
-  <!-- 💻 لوحة التحكم (الداشبورد) -->
   @else {
-    <!-- الشريط العلوي -->
     <header class="glass-header">
       <div class="header-brand">
         <img src="logo.jpg" alt="Logo" class="header-logo" onerror="this.src='assets/logo.jpg'">
@@ -72,104 +66,181 @@
     </header>
 
     <div class="dashboard-layout">
-      <!-- الشريط الجانبي -->
+      <!-- 🚀 الشريط الجانبي المحدث -->
       <aside class="glass-sidebar">
+        <button (click)="switchTab('home')" class="sidebar-btn" [class.active]="activeTab === 'home'">
+          🏠 الصفحة الرئيسية
+        </button>
         <button (click)="switchTab('all')" class="sidebar-btn" [class.active]="activeTab === 'all'">
           👥 السجل الشامل
         </button>
         <button (click)="switchTab('vip')" class="sidebar-btn vip-btn" [class.active-vip]="activeTab === 'vip'">
           <span class="pulse-anim inline-block">⭐</span> الزبائن المميزين
         </button>
+        <button (click)="switchTab('stats')" class="sidebar-btn" [class.active]="activeTab === 'stats'">
+          📊 الإحصائيات الذكية
+        </button>
       </aside>
 
-      <!-- المحتوى الرئيسي -->
       <main class="main-content">
-        <div class="cards-grid">
-          
-          <!-- كرت إضافة/تعديل -->
-          <div class="glass-card slide-up">
-            <h3 class="card-title">{{ editingCustomerId ? '✏️ تحديث بيانات الزبون' : '👤 إضافة زبون جديد' }}</h3>
-            <input type="text" [(ngModel)]="customerName" placeholder="الاسم الكامل" class="glass-input mt-2">
-            <input type="tel" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="customerPhone" placeholder="رقم الهاتف (مثال: 079)" class="glass-input mt-2 text-right" dir="ltr">
+        
+        <!-- 🏠 1. الصفحة الرئيسية (ترحيب + سوشيال ميديا) -->
+        @if (activeTab === 'home') {
+          <div class="glass-card text-center slide-up" style="max-width: 800px; margin: 0 auto; padding: 50px 20px;">
+            <div class="logo-container" style="margin-bottom: 30px;">
+              <div class="logo-ring"></div>
+              <img src="logo.jpg" alt="SPARK SPORT" class="brand-logo" onerror="this.src='assets/logo.jpg'" style="width: 120px; height: 120px;">
+            </div>
             
-            <label class="vip-checkbox mt-2">
-              <input type="checkbox" [(ngModel)]="isVIP">
-              <span class="checkbox-text">⭐ تصنيف كزبون مميز (VIP)</span>
-            </label>
+            <h2 class="neon-text" style="font-size: 40px; margin-bottom: 10px;">أهلاً بك في نظام SPARK SPORT</h2>
+            <h3 style="color: #f1c40f; font-size: 24px; font-weight: 900; text-shadow: 0 0 10px rgba(241,196,15,0.5);">
+              المدير العام: أبو هشام أخميس الغالي 👑
+            </h3>
+            
+            <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 20px; margin: 40px 0; border: 1px solid rgba(255,255,255,0.1);">
+              <p style="font-size: 22px; color: #a4b0be; font-weight: bold;">{{ currentDate }}</p>
+              <p style="font-size: 55px; font-weight: 900; color: #fff; letter-spacing: 3px; margin: 10px 0; text-shadow: 0 0 20px rgba(142,68,173,0.8);">
+                {{ currentTime }}
+              </p>
+            </div>
+            
+            <p style="color: #a4b0be; margin-bottom: 20px; font-size: 18px; font-weight: bold;">روابط الوصول السريع:</p>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+              <button (click)="openFacebook()" class="btn-glow" style="background: #1877F2; border: none; padding: 15px 30px; font-size: 18px;">Facebook 📘</button>
+              <button (click)="openInstagram()" class="btn-glow" style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); border: none; padding: 15px 30px; font-size: 18px;">Instagram 📸</button>
+              <button (click)="openWhatsAppContact()" class="btn-glow" style="background: #25D366; border: none; padding: 15px 30px; font-size: 18px; color: #000;">WhatsApp 💬</button>
+            </div>
+          </div>
+        }
 
-            <button (click)="saveCustomer()" class="btn-glow mt-3 w-100" [ngClass]="editingCustomerId ? 'btn-purple' : (activeTab === 'vip' ? 'btn-gold' : 'btn-primary')">
-              {{ editingCustomerId ? 'حفظ التعديلات' : 'إضافة للنظام' }}
-            </button>
-            @if (editingCustomerId) {
-              <button (click)="cancelEdit()" class="btn-glow btn-cancel mt-2 w-100">إلغاء</button>
+        <!-- 📊 2. صفحة الإحصائيات -->
+        @else if (activeTab === 'stats') {
+          <div class="cards-grid">
+            <div class="glass-card text-center slide-up">
+              <h3 class="card-title m-0" style="color: #b28dff; border:none;">إجمالي الزبائن في النظام</h3>
+              <p style="font-size: 60px; font-weight: 900; color: #fff; margin: 20px 0; text-shadow: 0 0 20px rgba(142,68,173,0.8);">{{ totalCustomersCount }}</p>
+            </div>
+            
+            <div class="glass-card text-center slide-up delay-1">
+              <h3 class="card-title m-0" style="color: #f1c40f; border:none;">نسبة كبار الشخصيات (VIP)</h3>
+              <p style="font-size: 60px; font-weight: 900; color: #fff; margin: 20px 0; text-shadow: 0 0 20px rgba(241,196,15,0.8);">{{ vipPercentage }}%</p>
+            </div>
+          </div>
+
+          <div class="glass-card table-card slide-up delay-2 mt-3">
+            <h3 class="card-title" style="padding-bottom: 20px;">🆕 أحدث 5 زبائن انضموا للمتجر</h3>
+            <div class="table-wrapper">
+              <table class="glass-table">
+                <thead>
+                  <tr><th>الاسم</th><th>رقم الهاتف</th><th>التصنيف</th></tr>
+                </thead>
+                <tbody>
+                  @for (customer of recentCustomers; track customer.id) {
+                    <tr class="table-row">
+                      <td class="font-bold text-white">{{ customer.name }}</td>
+                      <td class="text-spacing">{{ customer.phoneNumber }}</td>
+                      <td>
+                        @if (customer.isVIP) { <span class="vip-badge">⭐ VIP</span> }
+                        @else { <span style="color: #a4b0be; font-weight: bold;">عادي</span> }
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr><td colspan="3" class="empty-state">لا يوجد بيانات!</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        <!-- 👥 3. الشاشات الأصلية (السجل الشامل والـ VIP) -->
+        @else {
+          <div class="cards-grid">
+            <!-- كرت إضافة/تعديل -->
+            <div class="glass-card slide-up">
+              <h3 class="card-title">{{ editingCustomerId ? '✏️ تحديث بيانات الزبون' : '👤 إضافة زبون جديد' }}</h3>
+              <input type="text" [(ngModel)]="customerName" placeholder="الاسم الكامل" class="glass-input mt-2">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="customerPhone" placeholder="رقم الهاتف (مثال: 079)" class="glass-input mt-2 text-right" dir="ltr">
+              
+              <label class="vip-checkbox mt-2">
+                <input type="checkbox" [(ngModel)]="isVIP">
+                <span class="checkbox-text">⭐ تصنيف كزبون مميز (VIP)</span>
+              </label>
+
+              <button (click)="saveCustomer()" class="btn-glow mt-3 w-100" [ngClass]="editingCustomerId ? 'btn-purple' : (activeTab === 'vip' ? 'btn-gold' : 'btn-primary')">
+                {{ editingCustomerId ? 'حفظ التعديلات' : 'إضافة للنظام' }}
+              </button>
+              @if (editingCustomerId) {
+                <button (click)="cancelEdit()" class="btn-glow btn-cancel mt-2 w-100">إلغاء</button>
+              }
+            </div>
+
+            <!-- كرت حملة الإرسال -->
+            <div class="glass-card campaign-card slide-up delay-1">
+              <h3 class="card-title camp-title">🚀 ارسال للكل</h3>
+              <input type="text" [(ngModel)]="campName" placeholder="المنتج المستهدف (مثال: حذاء رياضي)" class="glass-input mt-2">
+              <input type="tel" inputmode="numeric" [(ngModel)]="campPrice" placeholder="السعر (مثلا: 25)" class="glass-input mt-2">
+              <textarea [(ngModel)]="campDesc" placeholder="تفاصيل ومواصفات المنتج..." rows="2" class="glass-input mt-2 resize-none"></textarea>
+              <input type="text" [(ngModel)]="campImageLink" placeholder="رابط الصورة (URL)" class="glass-input mt-2">
+              
+              <button (click)="sendBulkWhatsApp()" class="btn-glow btn-gold w-100 mt-3">
+                إرسال للزبون ({{ currentCustomerIndex + 1 }}) من أصل ({{ targetCustomersCount }}) 💬
+              </button>
+            </div>
+          </div>
+
+          <!-- جدول البيانات -->
+          <div class="glass-card table-card slide-up delay-2 mt-3">
+            <div class="table-header">
+              <h3 class="card-title m-0">{{ activeTab === 'vip' ? '⭐ قائمة الزبائن المميزين ⭐' : '👥 قاعدة بيانات الزبائن' }}</h3>
+              <input type="tel" inputmode="numeric" [(ngModel)]="searchTerm" (input)="onSearchChange()" placeholder="🔍 ابحث برقم الهاتف..." class="glass-input search-box m-0">
+            </div>
+
+            <div class="table-wrapper">
+              <table class="glass-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>اسم الزبون</th>
+                    <th>رقم الهاتف</th>
+                    <th>إجراءات النظام</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (customer of processedCustomers; track customer.id; let i = $index) {
+                    <tr class="table-row">
+                      <td class="text-highlight font-bold">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+                      <td class="font-bold text-white">
+                        {{ customer.name }}
+                        @if (customer.isVIP) { <span class="vip-badge pulse-anim">⭐ VIP</span> }
+                      </td>
+                      <td class="text-spacing">{{ customer.phoneNumber }}</td>
+                      <td>
+                        <div class="action-buttons">
+                          <button (click)="sendSingleWhatsApp(customer)" class="action-btn btn-wa">💬 مراسلة</button>
+                          <button (click)="editCustomer(customer)" class="action-btn btn-edit">✏️ تعديل</button>
+                          <button (click)="askDelete(customer.id)" class="action-btn btn-del">🗑️ حذف</button>
+                        </div>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="4" class="empty-state">لا يوجد بيانات مطابقة في النظام 📭</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            @if (totalPages > 1) {
+              <div class="pagination-controls mt-3">
+                <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="page-btn">التالي ◀</button>
+                <span class="page-info">صفحة <strong>{{ currentPage }}</strong> من <strong>{{ totalPages }}</strong></span>
+                <button (click)="prevPage()" [disabled]="currentPage === 1" class="page-btn">▶ السابق</button>
+              </div>
             }
           </div>
-
-          <!-- كرت حملة الإرسال -->
-          <div class="glass-card campaign-card slide-up delay-1">
-            <h3 class="card-title camp-title">🚀 ارسال للكل</h3>
-            <input type="text" [(ngModel)]="campName" placeholder="المنتج المستهدف (مثال: حذاء رياضي)" class="glass-input mt-2">
-            <input type="tel" inputmode="numeric" [(ngModel)]="campPrice" placeholder="السعر (مثلا: 25)" class="glass-input mt-2">
-            <textarea [(ngModel)]="campDesc" placeholder="تفاصيل ومواصفات المنتج..." rows="2" class="glass-input mt-2 resize-none"></textarea>
-            <input type="text" [(ngModel)]="campImageLink" placeholder="رابط الصورة (URL)" class="glass-input mt-2">
-            
-            <button (click)="sendBulkWhatsApp()" class="btn-glow btn-gold w-100 mt-3">
-              إرسال للزبون ({{ currentCustomerIndex + 1 }}) من أصل ({{ targetCustomersCount }}) 💬
-            </button>
-          </div>
-        </div>
-
-        <!-- جدول البيانات -->
-        <div class="glass-card table-card slide-up delay-2 mt-3">
-          <div class="table-header">
-            <h3 class="card-title m-0">{{ activeTab === 'vip' ? '⭐ قائمة الزبائن المميزين ⭐' : '👥 قاعدة بيانات الزبائن' }}</h3>
-            <input type="tel" inputmode="numeric" [(ngModel)]="searchTerm" (input)="onSearchChange()" placeholder="🔍 ابحث برقم الهاتف..." class="glass-input search-box m-0">
-          </div>
-
-          <div class="table-wrapper">
-            <table class="glass-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>اسم الزبون</th>
-                  <th>رقم الهاتف</th>
-                  <th>إجراءات النظام</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (customer of processedCustomers; track customer.id; let i = $index) {
-                  <tr class="table-row">
-                    <td class="text-highlight font-bold">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
-                    <td class="font-bold text-white">
-                      {{ customer.name }}
-                      @if (customer.isVIP) { <span class="vip-badge pulse-anim">⭐ VIP</span> }
-                    </td>
-                    <td class="text-spacing">{{ customer.phoneNumber }}</td>
-                    <td>
-                      <div class="action-buttons">
-                        <button (click)="sendSingleWhatsApp(customer)" class="action-btn btn-wa">💬 مراسلة</button>
-                        <button (click)="editCustomer(customer)" class="action-btn btn-edit">✏️ تعديل</button>
-                        <button (click)="askDelete(customer.id)" class="action-btn btn-del">🗑️ حذف</button>
-                      </div>
-                    </td>
-                  </tr>
-                } @empty {
-                  <tr>
-                    <td colspan="4" class="empty-state">لا يوجد بيانات مطابقة في النظام 📭</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-
-          @if (totalPages > 1) {
-            <div class="pagination-controls mt-3">
-              <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="page-btn">التالي ◀</button>
-              <span class="page-info">صفحة <strong>{{ currentPage }}</strong> من <strong>{{ totalPages }}</strong></span>
-              <button (click)="prevPage()" [disabled]="currentPage === 1" class="page-btn">▶ السابق</button>
-            </div>
-          }
-        </div>
+        }
       </main>
     </div>
   }

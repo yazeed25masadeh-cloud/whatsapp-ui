@@ -117,7 +117,13 @@
 .table-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; }
 .search-box { max-width: 350px; background: rgba(0,0,0,0.5); }
 
-.table-wrapper { overflow-x: auto; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+.table-wrapper { 
+  width: 100%; 
+  overflow-x: auto; 
+  -webkit-overflow-scrolling: touch; 
+  border-radius: 16px; 
+  border: 1px solid rgba(255,255,255,0.05); 
+}
 .glass-table { width: 100%; border-collapse: collapse; text-align: center; min-width: 750px; }
 .glass-table th { background: rgba(0,0,0,0.6); color: #a4b0be; padding: 18px 15px; font-weight: 800; border-bottom: 2px solid rgba(255,255,255,0.1); }
 .glass-table td { padding: 16px 15px; border-bottom: 1px solid rgba(255,255,255,0.03); background: rgba(255,255,255,0.01); }
