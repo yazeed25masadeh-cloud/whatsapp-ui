@@ -29,20 +29,33 @@
     </div>
   }
 
-  @if (!isLoggedIn) {
-    <div class="login-container">
-      <div class="sport-card login-card glass-panel float-anim">
+@if (!isLoggedIn) {
+    <div class="login-container relative-container">
+      
+      <!-- 🏃‍♂️ الحركة الرياضية الفضائية في الخلفية 🏀 -->
+      <div class="sports-bg-animation">
+        <div class="sport-icon icon-1">⚽</div>
+        <div class="sport-icon icon-2">🏀</div>
+        <div class="sport-icon icon-3">🎾</div>
+        <div class="sport-icon icon-4">🏃‍♂️</div>
+        <div class="sport-icon icon-5">🥊</div>
+        <div class="sport-icon icon-6">🏆</div>
+        <div class="sport-icon icon-7">🏋️‍♂️</div>
+        <div class="sport-icon icon-8">🏐</div>
+      </div>
+
+      <div class="sport-card login-card glass-panel float-anim relative-z">
         <div class="logo-glow-wrapper">
           <img src="logo.jpg" alt="SPARK SPORT" class="login-logo" onerror="this.src='assets/logo.jpg'">
         </div>
         <h2 class="neon-title">بوابة الدخول</h2>
-        <p style="color: #a4b0be; margin-bottom: 25px;">نظام الإدارة المتقدم | v2.0</p>
+        <p style="color: #a4b0be; margin-bottom: 25px; font-weight: bold;">نظام الإدارة التسويقية</p>
         <input type="text" [(ngModel)]="loginUser" placeholder="اسم المستخدم" class="sport-input text-center">
         <input type="password" [(ngModel)]="loginPass" placeholder="كلمة المرور" class="sport-input text-center">
         <button (click)="doLogin()" class="btn-main btn-gold glow-effect" style="margin-top: 15px;">دخول آمن ⚡</button>
       </div>
     </div>
-  } 
+  }
   
   @else {
     <div class="top-navbar glass-panel">
@@ -55,7 +68,7 @@
           <p class="nav-subtitle">مركز التحكم التسويقي</p>
         </div>
       </div>
-      <button (click)="doLogout()" class="btn-main btn-cancel logout-btn">إنهاء الجلسة 🔒</button>
+      <button (click)="doLogout()" class="btn-main btn-cancel logout-btn">تسجيل الخروج  🔒</button>
     </div>
 
     <div class="dashboard-layout">
