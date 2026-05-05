@@ -78,7 +78,7 @@
           👥 السجل الشامل
         </button>
         <button (click)="switchTab('vip')" class="sidebar-btn vip-btn" [class.active-vip]="activeTab === 'vip'">
-          <span class="pulse-anim inline-block">⭐</span> كبار الشخصيات
+          <span class="pulse-anim inline-block">⭐</span> الزبائن المميزين
         </button>
       </aside>
 
@@ -107,7 +107,7 @@
 
           <!-- كرت حملة الإرسال -->
           <div class="glass-card campaign-card slide-up delay-1">
-            <h3 class="card-title camp-title">🚀 منصة الإطلاق السريع</h3>
+            <h3 class="card-title camp-title">🚀 ارسال للكل</h3>
             <input type="text" [(ngModel)]="campName" placeholder="المنتج المستهدف (مثال: حذاء رياضي)" class="glass-input mt-2">
             <input type="tel" inputmode="numeric" [(ngModel)]="campPrice" placeholder="السعر (مثلا: 25)" class="glass-input mt-2">
             <textarea [(ngModel)]="campDesc" placeholder="تفاصيل ومواصفات المنتج..." rows="2" class="glass-input mt-2 resize-none"></textarea>
