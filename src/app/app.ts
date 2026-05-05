@@ -33,8 +33,8 @@ export class AppComponent implements OnInit, OnDestroy {
   currentPage: number = 1;
   itemsPerPage: number = 50;
   
-  // 🌟 التعديل: إضافة الشاشات الجديدة للتابات
-  activeTab: 'home' | 'all' | 'vip' | 'stats' = 'home';
+  // تابات النظام (ضفنا تاب المبيعات)
+  activeTab: 'home' | 'all' | 'vip' | 'stats' | 'sales' = 'home';
 
   showAlert: boolean = false;
   alertMessage: string = '';
@@ -42,10 +42,16 @@ export class AppComponent implements OnInit, OnDestroy {
   confirmMessage: string = '';
   customerToDelete: number | null = null;
 
-  // 🕒 متغيرات الوقت والتاريخ
+  // متغيرات الوقت والتاريخ
   currentTime: string = '';
   currentDate: string = '';
   clockInterval: any;
+
+  // 💰 متغيرات صندوق المبيعات (Cash Register)
+  dailySales: any[] = [];
+  saleItem: string = '';
+  salePrice: number | null = null;
+  saleMethod: 'cash' | 'visa' = 'cash';
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
@@ -56,16 +62,17 @@ export class AppComponent implements OnInit, OnDestroy {
         error: () => console.log('جاري إيقاظ السيرفر...')
       });
 
-    // 🕒 تشغيل الساعة أول ما يفتح الموقع
     this.updateClock();
     this.clockInterval = setInterval(() => this.updateClock(), 1000);
+    
+    // تحميل مبيعات اليوم من ذاكرة الآيباد
+    this.loadDailySales();
   }
 
   ngOnDestroy() {
     if (this.clockInterval) clearInterval(this.clockInterval);
   }
 
-  // 🕒 دالة تحديث الوقت والتاريخ
   updateClock() {
     const now = new Date();
     const dateOptions: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -74,22 +81,14 @@ export class AppComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  // 📊 دوال الإحصائيات الذكية
-  get totalCustomersCount() {
-    return this.customers.length;
-  }
-
+  get totalCustomersCount() { return this.customers.length; }
   get vipPercentage() {
     if (this.customers.length === 0) return 0;
     const vips = this.customers.filter(c => c.isVIP).length;
     return Math.round((vips / this.customers.length) * 100);
   }
+  get recentCustomers() { return [...this.customers].sort((a, b) => b.id - a.id).slice(0, 5); }
 
-  get recentCustomers() {
-    return [...this.customers].sort((a, b) => b.id - a.id).slice(0, 5);
-  }
-
-  // 🌐 روابط السوشيال ميديا
   openFacebook() { window.open('https://web.facebook.com/SparkSportsShop/', '_blank'); }
   openInstagram() { window.open('https://www.instagram.com/sparksport_jo?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==', '_blank'); }
   openWhatsAppContact() { window.open('https://wa.me/962787540539', '_blank'); }
@@ -113,16 +112,14 @@ export class AppComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  switchTab(tab: 'home' | 'all' | 'vip' | 'stats') {
+  switchTab(tab: 'home' | 'all' | 'vip' | 'stats' | 'sales') {
     this.activeTab = tab;
     this.currentPage = 1; 
     this.currentCustomerIndex = 0;
     this.cdr.detectChanges();
   }
 
-  get targetCustomersCount() {
-    return this.activeTab === 'vip' ? this.customers.filter(c => c.isVIP).length : this.customers.length;
-  }
+  get targetCustomersCount() { return this.activeTab === 'vip' ? this.customers.filter(c => c.isVIP).length : this.customers.length; }
 
   get processedCustomers() {
     let filtered = this.customers;
@@ -159,9 +156,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.customerName = customer.name;
     this.customerPhone = customer.phoneNumber;
     this.isVIP = customer.isVIP || false; 
-    
-    // نرجع لتاب 'all' أو 'vip' عشان تبين شاشة التعديل إذا كنا بالإحصائيات
-    if (this.activeTab === 'home' || this.activeTab === 'stats') {
+    if (this.activeTab === 'home' || this.activeTab === 'stats' || this.activeTab === 'sales') {
       this.switchTab('all');
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -182,19 +177,13 @@ export class AppComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const customerData = { 
-      name: this.customerName, 
-      phoneNumber: this.customerPhone,
-      isVIP: this.isVIP 
-    };
+    const customerData = { name: this.customerName, phoneNumber: this.customerPhone, isVIP: this.isVIP };
 
     if (this.editingCustomerId) {
       this.http.put<any>(`https://whatsappsenderapi.onrender.com/api/customers/${this.editingCustomerId}`, customerData)
         .subscribe({
           next: () => {
-            this.loadCustomers(); 
-            this.cancelEdit();    
-            this.triggerAlert('تم تحديث بيانات الزبون بنجاح!');
+            this.loadCustomers(); this.cancelEdit(); this.triggerAlert('تم تحديث بيانات الزبون بنجاح!');
           },
           error: (err) => console.error(err)
         });
@@ -202,9 +191,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.http.post<any>('https://whatsappsenderapi.onrender.com/api/customers', customerData)
         .subscribe({
           next: () => {
-            this.loadCustomers(); 
-            this.cancelEdit();    
-            this.triggerAlert('تم إضافة الزبون للقائمة بنجاح!');
+            this.loadCustomers(); this.cancelEdit(); this.triggerAlert('تم إضافة الزبون للقائمة بنجاح!');
           },
           error: (err) => console.error(err)
         });
@@ -231,55 +218,29 @@ export class AppComponent implements OnInit, OnDestroy {
       this.http.delete(`https://whatsappsenderapi.onrender.com/api/customers/${this.customerToDelete}`)
         .subscribe({
           next: () => {
-            this.loadCustomers(); 
-            this.showConfirm = false;
-            this.customerToDelete = null;
-            this.cdr.detectChanges();
+            this.loadCustomers(); this.showConfirm = false; this.customerToDelete = null; this.cdr.detectChanges();
           },
           error: (err) => {
-            this.showConfirm = false;
-            this.triggerAlert('صار مشكلة بالحذف!');
+            this.showConfirm = false; this.triggerAlert('صار مشكلة بالحذف!');
           }
         });
     }
   }
 
-  cancelDelete() { 
-    this.showConfirm = false; 
-    this.customerToDelete = null; 
-    this.cdr.detectChanges();
-  }
+  cancelDelete() { this.showConfirm = false; this.customerToDelete = null; this.cdr.detectChanges(); }
+  triggerAlert(msg: string) { this.alertMessage = msg; this.showAlert = true; this.cdr.detectChanges(); }
+  closeAlert() { this.showAlert = false; this.cdr.detectChanges(); }
 
-  triggerAlert(msg: string) { 
-    this.alertMessage = msg; 
-    this.showAlert = true; 
-    this.cdr.detectChanges();
-  }
-
-  closeAlert() { 
-    this.showAlert = false; 
-    this.cdr.detectChanges();
-  }
-
-  sendSingleWhatsApp(customer: any) { 
-    this.executeWhatsApp(customer); 
-  }
+  sendSingleWhatsApp(customer: any) { this.executeWhatsApp(customer); }
 
   sendBulkWhatsApp() {
-    if (!this.campName || !this.campPrice) { 
-      this.triggerAlert('عبي تفاصيل المنتج أولاً يا معلم!'); 
-      return; 
-    }
-    
+    if (!this.campName || !this.campPrice) { this.triggerAlert('عبي تفاصيل المنتج أولاً يا معلم!'); return; }
     let targetCustomers = this.activeTab === 'vip' ? this.customers.filter(c => c.isVIP) : this.customers;
-
     if (targetCustomers.length === 0) return;
     
     if (this.currentCustomerIndex >= targetCustomers.length) {
       this.triggerAlert('🎉 خلصنا! تم الإرسال لكل الزباين بالقائمة المختارة.');
-      this.currentCustomerIndex = 0; 
-      this.cdr.detectChanges();
-      return;
+      this.currentCustomerIndex = 0; this.cdr.detectChanges(); return;
     }
     const customerTarget = targetCustomers[this.currentCustomerIndex];
     this.executeWhatsApp(customerTarget);
@@ -298,5 +259,76 @@ export class AppComponent implements OnInit, OnDestroy {
     let phone = customer.phoneNumber;
     if (phone.startsWith('0')) phone = '962' + phone.substring(1);
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+  }
+
+  // ==========================================
+  // 💰 دوال صندوق المبيعات (الورقة الرقمية)
+  // ==========================================
+  loadDailySales() {
+    const saved = localStorage.getItem('sparkDailySales');
+    if (saved) { this.dailySales = JSON.parse(saved); }
+  }
+
+  saveDailySales() {
+    localStorage.setItem('sparkDailySales', JSON.stringify(this.dailySales));
+  }
+
+  addSale() {
+    if (!this.saleItem || !this.salePrice) {
+      this.triggerAlert('الرجاء إدخال اسم القطعة وسعرها!'); return;
+    }
+    const newSale = {
+      id: Date.now(),
+      item: this.saleItem,
+      price: parseFloat(this.salePrice.toString()),
+      method: this.saleMethod,
+      time: new Date().toLocaleTimeString('ar-JO', { hour: '2-digit', minute: '2-digit' })
+    };
+    
+    this.dailySales.unshift(newSale); // إضافة البيعة لأول الجدول
+    this.saveDailySales();
+
+    // تصفير الخانات لبيعة جديدة بسرعة
+    this.saleItem = '';
+    this.salePrice = null;
+    this.cdr.detectChanges();
+  }
+
+  deleteSale(id: number) {
+    this.dailySales = this.dailySales.filter(s => s.id !== id);
+    this.saveDailySales();
+    this.cdr.detectChanges();
+  }
+
+  get totalCash() { return this.dailySales.filter(s => s.method === 'cash').reduce((sum, s) => sum + s.price, 0); }
+  get totalVisa() { return this.dailySales.filter(s => s.method === 'visa').reduce((sum, s) => sum + s.price, 0); }
+  get totalSales() { return this.totalCash + this.totalVisa; }
+
+  sendDailyReport() {
+    if (this.dailySales.length === 0) {
+      this.triggerAlert('الصندوق فاضي، ما في مبيعات نرسلها!'); return;
+    }
+
+    let report = `*📊 تقرير إغلاق اليومية - Spark Sport*\n`;
+    report += `التاريخ: ${this.currentDate}\n`;
+    report += `الوقت: ${this.currentTime}\n\n`;
+    report += `💵 *الكاش في الدرج:* ${this.totalCash} دينار\n`;
+    report += `💳 *مبيعات الفيزا:* ${this.totalVisa} دينار\n`;
+    report += `💰 *الإجمالي الكلي:* ${this.totalSales} دينار\n\n`;
+    report += `*📝 تفاصيل المبيعات:*\n`;
+    
+    // الترتيب من الأقدم للأحدث بالرسالة
+    [...this.dailySales].reverse().forEach((s, idx) => {
+       report += `${idx + 1}. ${s.item} - ${s.price} د.أ (${s.method === 'cash' ? 'كاش' : 'فيزا'}) [${s.time}]\n`;
+    });
+    
+    let phone = '962787540539'; // رقم أبو هشام
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(report)}`, '_blank');
+  }
+
+  clearDailySales() {
+    this.dailySales = [];
+    this.saveDailySales();
+    this.triggerAlert('تم تصفير الصندوق وبدء شفت جديد! 🚀');
   }
 }

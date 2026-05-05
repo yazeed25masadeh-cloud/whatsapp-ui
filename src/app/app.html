@@ -71,6 +71,9 @@
         <button (click)="switchTab('home')" class="sidebar-btn" [class.active]="activeTab === 'home'">
           🏠 الصفحة الرئيسية
         </button>
+        <button (click)="switchTab('sales')" class="sidebar-btn" [class.active]="activeTab === 'sales'" style="border-left: 4px solid #25D366;">
+          💳 مبيعات اليوم (الكاشير)
+        </button>
         <button (click)="switchTab('all')" class="sidebar-btn" [class.active]="activeTab === 'all'">
           👥 السجل الشامل
         </button>
@@ -84,7 +87,7 @@
 
       <main class="main-content">
         
-        <!-- 🏠 1. الصفحة الرئيسية (ترحيب + سوشيال ميديا) -->
+        <!-- 🏠 الصفحة الرئيسية -->
         @if (activeTab === 'home') {
           <div class="glass-card text-center slide-up" style="max-width: 800px; margin: 0 auto; padding: 50px 20px;">
             <div class="logo-container" style="margin-bottom: 30px;">
@@ -113,7 +116,93 @@
           </div>
         }
 
-        <!-- 📊 2. صفحة الإحصائيات -->
+        <!-- 💰 صفحة الكاشير (المبيعات اليومية) -->
+        @else if (activeTab === 'sales') {
+          <div class="cards-grid">
+            <!-- 1. عدادات الكاش والفيزا -->
+            <div class="glass-card slide-up" style="border-top-color: #25D366;">
+              <h3 class="card-title" style="color: #25D366;">ملخص الصندوق</h3>
+              <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <span style="font-size: 18px; font-weight: bold; color: #a4b0be;">💵 كاش بالدرج:</span>
+                <span style="font-size: 20px; font-weight: 900; color: #25D366;">{{ totalCash }} دينار</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <span style="font-size: 18px; font-weight: bold; color: #a4b0be;">💳 مبيعات فيزا:</span>
+                <span style="font-size: 20px; font-weight: 900; color: #3498db;">{{ totalVisa }} دينار</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 15px 0 0 0;">
+                <span style="font-size: 22px; font-weight: bold; color: #fff;">💰 الإجمالي:</span>
+                <span style="font-size: 24px; font-weight: 900; color: #f1c40f;">{{ totalSales }} دينار</span>
+              </div>
+
+              <!-- أزرار الإغلاق والتصفير -->
+              <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button (click)="sendDailyReport()" class="btn-glow btn-wa w-100" style="padding: 12px; font-size: 14px;">إرسال التقرير 📲</button>
+                <button (click)="clearDailySales()" class="btn-glow btn-danger w-100" style="padding: 12px; font-size: 14px;">تصفير اليومية 🔄</button>
+              </div>
+            </div>
+
+            <!-- 2. كرت إدخال بيعة سريعة -->
+            <div class="glass-card slide-up delay-1" style="border-top-color: #3498db;">
+              <h3 class="card-title" style="color: #3498db;">➕ تسجيل بيعة سريعة</h3>
+              <input type="text" [(ngModel)]="saleItem" placeholder="البيان (مثال: تيشيرت رياضي)" class="glass-input mt-2">
+              <input type="tel" inputmode="numeric" [(ngModel)]="salePrice" placeholder="المبلغ (دينار)" class="glass-input mt-2">
+              
+              <div style="display: flex; gap: 15px; margin-top: 15px;">
+                <label style="flex: 1; text-align: center; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px; cursor: pointer; border: 1px solid" [style.borderColor]="saleMethod === 'cash' ? '#25D366' : 'rgba(255,255,255,0.1)'">
+                  <input type="radio" name="payMethod" value="cash" [(ngModel)]="saleMethod" style="display: none;">
+                  <span style="font-size: 18px; font-weight: bold;" [style.color]="saleMethod === 'cash' ? '#25D366' : '#a4b0be'">💵 كاش</span>
+                </label>
+                
+                <label style="flex: 1; text-align: center; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px; cursor: pointer; border: 1px solid" [style.borderColor]="saleMethod === 'visa' ? '#3498db' : 'rgba(255,255,255,0.1)'">
+                  <input type="radio" name="payMethod" value="visa" [(ngModel)]="saleMethod" style="display: none;">
+                  <span style="font-size: 18px; font-weight: bold;" [style.color]="saleMethod === 'visa' ? '#3498db' : '#a4b0be'">💳 فيزا</span>
+                </label>
+              </div>
+
+              <button (click)="addSale()" class="btn-glow w-100 mt-3" style="background: linear-gradient(135deg, #3498db, #2980b9); border: 1px solid #3498db;">
+                تسجيل البيعة 📝
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. جدول المبيعات (الورقة) -->
+          <div class="glass-card table-card slide-up delay-2 mt-3">
+            <h3 class="card-title">🧾 تفاصيل حركات اليوم</h3>
+            <div class="table-wrapper">
+              <table class="glass-table">
+                <thead>
+                  <tr>
+                    <th>الوقت</th>
+                    <th>البيان</th>
+                    <th>المبلغ</th>
+                    <th>طريقة الدفع</th>
+                    <th>حذف</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (sale of dailySales; track sale.id) {
+                    <tr class="table-row">
+                      <td style="color: #a4b0be; font-weight: bold;">{{ sale.time }}</td>
+                      <td class="font-bold text-white">{{ sale.item }}</td>
+                      <td style="color: #f1c40f; font-weight: 900;">{{ sale.price }} د.أ</td>
+                      <td>
+                        <span style="padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 13px;" [style.background]="sale.method === 'cash' ? 'rgba(37,211,102,0.2)' : 'rgba(52,152,219,0.2)'" [style.color]="sale.method === 'cash' ? '#25D366' : '#3498db'">
+                          {{ sale.method === 'cash' ? '💵 كاش' : '💳 فيزا' }}
+                        </span>
+                      </td>
+                      <td><button (click)="deleteSale(sale.id)" class="action-btn btn-del" style="padding: 5px 10px;">❌</button></td>
+                    </tr>
+                  } @empty {
+                    <tr><td colspan="5" class="empty-state">لم يتم تسجيل أي مبيعات حتى الآن.</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        <!-- 📊 صفحة الإحصائيات -->
         @else if (activeTab === 'stats') {
           <div class="cards-grid">
             <div class="glass-card text-center slide-up">
@@ -153,10 +242,9 @@
           </div>
         }
 
-        <!-- 👥 3. الشاشات الأصلية (السجل الشامل والـ VIP) -->
+        <!-- 👥 الشاشات الأصلية (السجل الشامل والـ VIP) -->
         @else {
           <div class="cards-grid">
-            <!-- كرت إضافة/تعديل -->
             <div class="glass-card slide-up">
               <h3 class="card-title">{{ editingCustomerId ? '✏️ تحديث بيانات الزبون' : '👤 إضافة زبون جديد' }}</h3>
               <input type="text" [(ngModel)]="customerName" placeholder="الاسم الكامل" class="glass-input mt-2">
@@ -175,7 +263,6 @@
               }
             </div>
 
-            <!-- كرت حملة الإرسال -->
             <div class="glass-card campaign-card slide-up delay-1">
               <h3 class="card-title camp-title">🚀 ارسال للكل</h3>
               <input type="text" [(ngModel)]="campName" placeholder="المنتج المستهدف (مثال: حذاء رياضي)" class="glass-input mt-2">
@@ -189,7 +276,6 @@
             </div>
           </div>
 
-          <!-- جدول البيانات -->
           <div class="glass-card table-card slide-up delay-2 mt-3">
             <div class="table-header">
               <h3 class="card-title m-0">{{ activeTab === 'vip' ? '⭐ قائمة الزبائن المميزين ⭐' : '👥 قاعدة بيانات الزبائن' }}</h3>
@@ -224,9 +310,7 @@
                       </td>
                     </tr>
                   } @empty {
-                    <tr>
-                      <td colspan="4" class="empty-state">لا يوجد بيانات مطابقة في النظام 📭</td>
-                    </tr>
+                    <tr><td colspan="4" class="empty-state">لا يوجد بيانات مطابقة في النظام 📭</td></tr>
                   }
                 </tbody>
               </table>
