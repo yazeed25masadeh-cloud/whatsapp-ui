@@ -168,34 +168,33 @@
 }
 
 /* =========================================
-   🏃‍♂️ تأثيرات الخلفية الرياضية (شاشة الدخول) 🏀
+   🏃‍♂️ تأثيرات الخلفية الرياضية (صور 3D) 🏀
    ========================================= */
-.relative-container { position: relative; width: 100%; overflow: hidden; }
+.relative-container { position: relative; width: 100%; min-height: 90vh; overflow: hidden; }
 .relative-z { z-index: 10; position: relative; }
 .sports-bg-animation { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; overflow: hidden; pointer-events: none; }
 
-.sport-icon { 
+.sport-img { 
   position: absolute; 
-  filter: drop-shadow(0 0 15px rgba(241, 196, 15, 0.5)) opacity(0); 
-  animation: floatUp 15s linear infinite; 
-  bottom: -10%; 
+  filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.6)); /* ظل واقعي للصور */
+  opacity: 0; 
+  animation: floatUpImages 16s ease-in-out infinite; 
+  bottom: -20%; 
 }
 
-/* توزيع الأيقونات الرياضية بسرعات وأحجام مختلفة عشان تبين طبيعية */
-.icon-1 { left: 10%; animation-duration: 12s; animation-delay: 0s; font-size: 3.5rem; }
-.icon-2 { left: 25%; animation-duration: 18s; animation-delay: 2s; font-size: 2.5rem; }
-.icon-3 { left: 40%; animation-duration: 15s; animation-delay: 4s; font-size: 4rem; }
-.icon-4 { left: 55%; animation-duration: 10s; animation-delay: 1s; font-size: 4.5rem; }
-.icon-5 { left: 70%; animation-duration: 14s; animation-delay: 3s; font-size: 3rem; }
-.icon-6 { left: 85%; animation-duration: 16s; animation-delay: 0s; font-size: 5rem; }
-.icon-7 { left: 15%; animation-duration: 13s; animation-delay: 5s; font-size: 3.2rem; }
-.icon-8 { left: 80%; animation-duration: 17s; animation-delay: 6s; font-size: 2.8rem; }
+/* أحجام ومسارات الصور */
+.icon-1 { left: 10%; width: 90px; animation-duration: 14s; animation-delay: 0s; }
+.icon-2 { left: 25%; width: 110px; animation-duration: 18s; animation-delay: 2s; }
+.icon-3 { left: 45%; width: 85px; animation-duration: 15s; animation-delay: 4s; }
+.icon-4 { left: 65%; width: 95px; animation-duration: 12s; animation-delay: 1s; }
+.icon-5 { left: 80%; width: 100px; animation-duration: 17s; animation-delay: 3s; }
+.icon-6 { left: 15%; width: 120px; animation-duration: 19s; animation-delay: 6s; }
 
-/* حركة الطيران والدوران الفضائية */
-@keyframes floatUp {
-  0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
-  10% { opacity: 0.15; } /* شفافية خفيفة عشان ما تزعج العين */
-  50% { transform: translateY(-50vh) rotate(180deg) scale(1.2); opacity: 0.3; }
-  90% { opacity: 0.15; }
-  100% { transform: translateY(-100vh) rotate(360deg) scale(0.8); opacity: 0; }
+/* حركة الطيران مع وضوح عالي (Opacity) */
+@keyframes floatUpImages {
+  0% { transform: translateY(0) rotate(-20deg) scale(0.8); opacity: 0; }
+  10% { opacity: 0.8; } /* صارت واضحة جداً */
+  50% { transform: translateY(-50vh) rotate(20deg) scale(1.2); opacity: 0.9; }
+  90% { opacity: 0.8; }
+  100% { transform: translateY(-110vh) rotate(-20deg) scale(0.8); opacity: 0; }
 }
