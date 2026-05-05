@@ -1,170 +1,209 @@
-<div class="spark-wrapper" [class.vip-theme]="activeTab === 'vip'">
-  
-  <!-- الدوائر المضيئة بالخلفية للتأثير الفضائي -->
-  <div class="ambient-blob blob-purple"></div>
-  <div class="ambient-blob blob-gold"></div>
+<div class="saas-app-wrapper" [class.vip-mode]="activeTab === 'vip'">
 
+  <!-- النوافذ المنبثقة (Modals) بطريقة احترافية -->
   @if (showAlert) {
-    <div class="custom-overlay">
-      <div class="custom-modal glass-panel">
-        <div class="modal-icon pulse-anim">⚡</div>
-        <h3 [style.color]="activeTab === 'vip' ? '#f1c40f' : '#b28dff'" style="margin-top: 0;">تنبيه النظام</h3>
-        <p style="font-size: 1.2em; font-weight: bold; color: #fff;">{{ alertMessage }}</p>
-        <button (click)="closeAlert()" class="btn-main" [ngClass]="activeTab === 'vip' ? 'btn-gold' : 'btn-purple'" style="width: 50%; margin-top: 20px;">استمرار</button>
+    <div class="saas-overlay">
+      <div class="saas-modal">
+        <div class="modal-header">
+          <span class="modal-title">إشعار النظام</span>
+        </div>
+        <div class="modal-body">
+          <p>{{ alertMessage }}</p>
+        </div>
+        <div class="modal-footer">
+          <button (click)="closeAlert()" class="saas-btn btn-primary">تأكيد</button>
+        </div>
       </div>
     </div>
   }
 
   @if (showConfirm) {
-    <div class="custom-overlay">
-      <div class="custom-modal glass-panel">
-        <div class="modal-icon warning-anim">⚠️</div>
-        <h3 style="color: #ff4757; margin-top: 0;">تأكيد أمني</h3>
-        <p style="font-size: 1.2em; font-weight: bold; color: #fff;">{{ confirmMessage }}</p>
-        <div style="display: flex; gap: 15px; margin-top: 25px;">
-          <button (click)="confirmDelete()" class="btn-main btn-del" style="margin: 0;">متأكد، امسح!</button>
-          <button (click)="cancelDelete()" class="btn-main btn-cancel" style="margin: 0;">إلغاء</button>
+    <div class="saas-overlay">
+      <div class="saas-modal">
+        <div class="modal-header">
+          <span class="modal-title text-danger">إجراء أمني</span>
+        </div>
+        <div class="modal-body">
+          <p>{{ confirmMessage }}</p>
+        </div>
+        <div class="modal-footer" style="display: flex; gap: 10px;">
+          <button (click)="cancelDelete()" class="saas-btn btn-secondary" style="flex: 1;">إلغاء</button>
+          <button (click)="confirmDelete()" class="saas-btn btn-danger" style="flex: 1;">حذف نهائي</button>
         </div>
       </div>
     </div>
   }
 
-@if (!isLoggedIn) {
-    <div class="login-container relative-container">
-      
-      <!-- 🏃‍♂️ الصور الرياضية الـ 3D المتحركة في الخلفية 🏀 -->
-      <div class="sports-bg-animation">
-        <img src="https://img.icons8.com/3d-fluency/188/sneakers.png" class="sport-img icon-1" alt="Shoe">
-        <img src="https://img.icons8.com/3d-fluency/188/dumbbell.png" class="sport-img icon-2" alt="Dumbbell">
-        <img src="https://img.icons8.com/3d-fluency/188/basketball.png" class="sport-img icon-3" alt="Basketball">
-        <img src="https://img.icons8.com/3d-fluency/188/football.png" class="sport-img icon-4" alt="Football">
-        <img src="https://img.icons8.com/3d-fluency/188/boxing-glove.png" class="sport-img icon-5" alt="Boxing">
-        <img src="https://img.icons8.com/3d-fluency/188/trophy.png" class="sport-img icon-6" alt="Trophy">
-      </div>
+  <!-- 🎬 شاشة الدخول (Cinematic Enterprise) -->
+  @if (!isLoggedIn) {
+    <div class="saas-login-view">
+      <div class="cinematic-bg"></div>
+      <div class="cinematic-overlay"></div>
 
-      <div class="sport-card login-card glass-panel float-anim relative-z">
-        <div class="logo-glow-wrapper">
-          <img src="logo.jpg" alt="SPARK SPORT" class="login-logo" onerror="this.src='assets/logo.jpg'">
+      <div class="login-bento-box relative-z">
+        <div class="brand-header">
+          <img src="logo.jpg" alt="Logo" class="brand-logo" onerror="this.src='assets/logo.jpg'">
+          <h2 class="brand-name">SPARK SPORT</h2>
+          <span class="brand-badge">Enterprise Edition</span>
         </div>
-        <h2 class="neon-title">بوابة الدخول</h2>
-        <p style="color: #a4b0be; margin-bottom: 25px; font-weight: bold;">نظام الإدارة التسويقية</p>
-        <input type="text" [(ngModel)]="loginUser" placeholder="اسم المستخدم" class="sport-input text-center">
-        <input type="password" [(ngModel)]="loginPass" placeholder="كلمة المرور" class="sport-input text-center">
-        <button (click)="doLogin()" class="btn-main btn-gold glow-effect" style="margin-top: 15px;">دخول آمن ⚡</button>
+        
+        <div class="form-group">
+          <label>معرف المستخدم</label>
+          <input type="text" [(ngModel)]="loginUser" class="saas-input text-center" dir="ltr">
+        </div>
+        <div class="form-group">
+          <label>مفتاح التشفير (كلمة المرور)</label>
+          <input type="password" [(ngModel)]="loginPass" class="saas-input text-center" dir="ltr">
+        </div>
+        
+        <button (click)="doLogin()" class="saas-btn btn-primary w-100" style="margin-top: 10px;">
+          مصادقة الدخول
+        </button>
       </div>
     </div>
-  }
+  } 
   
+  <!-- 💻 لوحة التحكم الرئيسية (Dashboard) -->
   @else {
-    <div class="top-navbar glass-panel">
-      <div style="display: flex; align-items: center; gap: 20px;">
-        <div class="logo-glow-wrapper">
-          <img src="logo.jpg" alt="SPARK SPORT" class="nav-logo" onerror="this.src='assets/logo.jpg'">
-        </div>
-        <div>
-          <h1 class="nav-title neon-title">SPARK SPORT</h1>
-          <p class="nav-subtitle">مركز التحكم التسويقي</p>
-        </div>
-      </div>
-      <button (click)="doLogout()" class="btn-main btn-cancel logout-btn">تسجيل الخروج  🔒</button>
-    </div>
-
-    <div class="dashboard-layout">
+    <div class="saas-dashboard">
       
-      <div class="sidebar glass-panel">
-        <button (click)="switchTab('all')" class="sidebar-btn" [class.active-tab]="activeTab === 'all'">
-          <span class="icon-space">👥</span> قاعدة الزبائن
-        </button>
-        <button (click)="switchTab('vip')" class="sidebar-btn vip-btn" [class.active-vip-tab]="activeTab === 'vip'">
-          <span class="icon-space pulse-anim" style="display: inline-block;">⭐</span> كبار الشخصيات
-        </button>
-      </div>
+      <!-- الشريط العلوي -->
+      <header class="saas-header">
+        <div class="header-brand">
+          <img src="logo.jpg" alt="Logo" class="header-logo" onerror="this.src='assets/logo.jpg'">
+          <div>
+            <h1 class="header-title">SPARK SPORT</h1>
+            <span class="header-subtitle">Workspace</span>
+          </div>
+        </div>
+        <button (click)="doLogout()" class="saas-btn btn-outline">تسجيل الخروج</button>
+      </header>
 
-      <div class="main-content">
-        <div class="cards-flexbox">
-          
-          <div class="sport-card glass-panel slide-up">
-            <h3 class="card-title neon-subtitle">
-              {{ editingCustomerId ? '✏️ تحديث بيانات العميل' : '👤 تسجيل عميل جديد' }}
-            </h3>
-            <input type="text" [(ngModel)]="customerName" placeholder="الاسم الكامل" class="sport-input">
-            <!-- التعديل الجوهري: إضافة type="tel" ليفتح كيبورد الأرقام فقط -->
-            <input type="tel" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="customerPhone" placeholder="رقم الهاتف (مثل 079...)" class="sport-input" dir="ltr" style="text-align: right;">
-            
-            <label class="vip-checkbox-label glass-input">
-              <input type="checkbox" [(ngModel)]="isVIP"> 
-              <span class="vip-text">⭐ ترقية لحساب VIP</span>
-            </label>
-
-            <button (click)="saveCustomer()" class="btn-main glow-effect" [ngClass]="editingCustomerId ? 'btn-yellow' : (activeTab === 'vip' ? 'btn-gold' : 'btn-purple')">
-              {{ editingCustomerId ? 'تأكيد التحديث' : 'تخزين بالبيانات' }}
+      <div class="saas-layout">
+        
+        <!-- الشريط الجانبي -->
+        <aside class="saas-sidebar">
+          <nav class="sidebar-nav">
+            <button (click)="switchTab('all')" class="nav-item" [class.active]="activeTab === 'all'">
+              <span class="nav-icon">⚲</span> قاعدة البيانات
             </button>
-            @if (editingCustomerId) {
-              <button (click)="cancelEdit()" class="btn-main btn-cancel" style="margin-top: 10px;">إلغاء الأمر</button>
+            <button (click)="switchTab('vip')" class="nav-item" [class.active]="activeTab === 'vip'">
+              <span class="nav-icon">★</span> كبار العملاء
+            </button>
+          </nav>
+        </aside>
+
+        <!-- المحتوى الرئيسي (Bento Grid) -->
+        <main class="saas-main">
+          
+          <div class="bento-grid">
+            <!-- كرت إضافة/تعديل عميل -->
+            <div class="bento-card">
+              <div class="card-header">
+                <h3>{{ editingCustomerId ? 'تحديث سجل العميل' : 'تسجيل عميل جديد' }}</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <input type="text" [(ngModel)]="customerName" placeholder="الاسم الكامل" class="saas-input">
+                </div>
+                <div class="form-group">
+                  <input type="tel" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="customerPhone" placeholder="رقم الهاتف (مثال: 079)" class="saas-input" dir="ltr" style="text-align: right;">
+                </div>
+                <label class="saas-checkbox">
+                  <input type="checkbox" [(ngModel)]="isVIP">
+                  <span class="checkbox-label">تصنيف كعميل VIP</span>
+                </label>
+                <div class="action-row mt-3">
+                  <button (click)="saveCustomer()" class="saas-btn" [ngClass]="editingCustomerId ? 'btn-accent' : 'btn-primary'" style="flex: 1;">
+                    {{ editingCustomerId ? 'حفظ التحديثات' : 'إدراج في النظام' }}
+                  </button>
+                  @if (editingCustomerId) {
+                    <button (click)="cancelEdit()" class="saas-btn btn-secondary">إلغاء</button>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- كرت الإرسال الجماعي -->
+            <div class="bento-card">
+              <div class="card-header">
+                <h3>وحدة الإرسال الجماعي</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <input type="text" [(ngModel)]="campName" placeholder="اسم المنتج" class="saas-input">
+                </div>
+                <div class="form-group">
+                  <input type="tel" inputmode="numeric" [(ngModel)]="campPrice" placeholder="السعر" class="saas-input">
+                </div>
+                <div class="form-group">
+                  <textarea [(ngModel)]="campDesc" placeholder="المواصفات..." rows="2" class="saas-input resize-none"></textarea>
+                </div>
+                <div class="form-group">
+                  <input type="text" [(ngModel)]="campImageLink" placeholder="رابط الصورة" class="saas-input">
+                </div>
+                <button (click)="sendBulkWhatsApp()" class="saas-btn btn-primary w-100 mt-2">
+                  إرسال دفعة ({{ currentCustomerIndex + 1 }}/{{ targetCustomersCount }})
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- جدول البيانات -->
+          <div class="bento-card full-width-card mt-4">
+            <div class="table-toolbar">
+              <h3>{{ activeTab === 'vip' ? 'سجل عملاء VIP' : 'السجل الشامل' }}</h3>
+              <div class="search-wrapper">
+                <input type="tel" inputmode="numeric" [(ngModel)]="searchTerm" (input)="onSearchChange()" placeholder="البحث برقم الهاتف..." class="saas-input search-input">
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="saas-table">
+                <thead>
+                  <tr>
+                    <th>المعرف</th>
+                    <th>اسم العميل</th>
+                    <th>رقم الاتصال</th>
+                    <th class="text-left">الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (customer of processedCustomers; track customer.id; let i = $index) {
+                    <tr>
+                      <td class="text-muted">#{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+                      <td class="font-medium">
+                        {{ customer.name }}
+                        @if (customer.isVIP) { <span class="badge-vip">VIP</span> }
+                      </td>
+                      <td class="text-mono">{{ customer.phoneNumber }}</td>
+                      <td class="text-left">
+                        <div class="table-actions">
+                          <button (click)="sendSingleWhatsApp(customer)" class="action-btn btn-wa" title="مراسلة">رسالة</button>
+                          <button (click)="editCustomer(customer)" class="action-btn btn-edit" title="تعديل">تعديل</button>
+                          <button (click)="askDelete(customer.id)" class="action-btn btn-del" title="حذف">حذف</button>
+                        </div>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="4" class="empty-state">لا توجد سجلات مطابقة.</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            @if (totalPages > 1) {
+              <div class="saas-pagination">
+                <button (click)="prevPage()" [disabled]="currentPage === 1" class="saas-btn btn-secondary">السابق</button>
+                <span class="page-indicator">{{ currentPage }} / {{ totalPages }}</span>
+                <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="saas-btn btn-secondary">التالي</button>
+              </div>
             }
           </div>
 
-          <div class="sport-card campaign-card glass-panel slide-up" style="animation-delay: 0.1s;">
-            <h3 class="card-title camp-title">🚀 منصة الإطلاق السريع</h3>
-            <input type="text" [(ngModel)]="campName" placeholder="المنتج المستهدف (مثال: حذاء رياضي)" class="sport-input">
-            <input type="tel" inputmode="numeric" [(ngModel)]="campPrice" placeholder="السعر (مثلا: 25)" class="sport-input">
-            <textarea [(ngModel)]="campDesc" placeholder="تفاصيل ومواصفات المنتج..." rows="2" class="sport-input" style="resize: none;"></textarea>
-            <input type="text" [(ngModel)]="campImageLink" placeholder="رابط الصورة (URL)" class="sport-input">
-            <button (click)="sendBulkWhatsApp()" class="btn-main btn-gold glow-effect" style="margin-top: 5px;">
-              إرسال للعميل ({{ currentCustomerIndex + 1 }}) من أصل ({{ targetCustomersCount }}) 💬
-            </button>
-          </div>
-
-        </div>
-
-        <div class="table-container glass-panel slide-up" style="animation-delay: 0.2s;">
-          <div class="table-header-controls">
-            <h3 class="card-title" style="margin: 0; border: none; font-size: 24px; color: #fff;">
-              {{ activeTab === 'vip' ? '⭐ بيانات كبار الشخصيات ⭐' : '👥 السجل الشامل' }}
-            </h3>
-            
-            <div class="search-box">
-              <input type="tel" inputmode="numeric" [(ngModel)]="searchTerm" (input)="onSearchChange()" placeholder="🔍 ابحث برقم الهاتف..." class="sport-input search-input">
-            </div>
-          </div>
-
-          <div class="table-responsive-wrapper">
-            <table class="sport-table">
-              <thead>
-                <tr><th>المعرف</th><th>الاسم</th><th>رقم الاتصال</th><th>إجراءات النظام</th></tr>
-              </thead>
-              <tbody>
-                @for (customer of processedCustomers; track customer.id; let i = $index) {
-                  <tr class="table-row-hover">
-                    <td class="id-cell">#{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
-                    <td class="name-cell">
-                      {{ customer.name }}
-                      @if (customer.isVIP) { <span class="vip-badge pulse-anim">⭐ VIP</span> }
-                    </td>
-                    <td style="letter-spacing: 1px;">{{ customer.phoneNumber }}</td>
-                    <td>
-                      <div class="action-group">
-                        <button (click)="sendSingleWhatsApp(customer)" class="btn-action btn-wa">💬 مراسلة</button>
-                        <button (click)="editCustomer(customer)" class="btn-action btn-edit">✏️ تعديل</button>
-                        <button (click)="askDelete(customer.id)" class="btn-action btn-del">🗑️ حذف</button>
-                      </div>
-                    </td>
-                  </tr>
-                } @empty {
-                  <tr><td colspan="4" class="empty-state">لا يوجد بيانات مطابقة للبحث في النظام 📭</td></tr>
-                }
-              </tbody>
-            </table>
-          </div>
-
-          @if (totalPages > 1) {
-            <div class="pagination-controls">
-              <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="page-btn">التالي ◀</button>
-              <span class="page-info glass-input">صفحة <strong>{{ currentPage }}</strong> / <strong>{{ totalPages }}</strong></span>
-              <button (click)="prevPage()" [disabled]="currentPage === 1" class="page-btn">▶ السابق</button>
-            </div>
-          }
-        </div>
+        </main>
       </div>
     </div>
   }
