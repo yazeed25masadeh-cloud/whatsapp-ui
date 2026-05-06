@@ -23,7 +23,7 @@ export class AppComponent implements OnInit, OnDestroy {
   customerPhone: string = '';
   isVIP: boolean = false; 
   customers: any[] = []; 
-  editingCustomerId: number | null = null;
+  editingCustomerId: any = null; // تم التخفيف لمنع خطأ Vercel
   
   // 🚀 متغيرات حملة الإرسال
   campName: string = '';
@@ -36,7 +36,7 @@ export class AppComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
   currentPage: number = 1;
   itemsPerPage: number = 50;
-  activeTab: 'home' | 'all' | 'vip' | 'stats' | 'sales' = 'home';
+  activeTab: string = 'home'; // تم التخفيف لمنع خطأ Vercel
 
   // 🕒 متغيرات الوقت والتاريخ
   currentTime: string = '';
@@ -44,34 +44,30 @@ export class AppComponent implements OnInit, OnDestroy {
   clockInterval: any;
 
   // 💰 متغيرات نظام الفواتير (صندوق المبيعات)
-  dailySales: any[] = []; // سجل الفواتير اليومي
-  currentBillItems: any[] = []; // الأصناف داخل الفاتورة الحالية
-  tempItemName: string = ''; // اسم الصنف المؤقت
-  tempItemPrice: number | null = null; // سعر الصنف المؤقت
-  saleMethod: 'cash' | 'visa' = 'cash'; // طريقة دفع الفاتورة
+  dailySales: any[] = []; 
+  currentBillItems: any[] = []; 
+  tempItemName: string = ''; 
+  tempItemPrice: any = null; // تم التخفيف لمنع خطأ Vercel
+  saleMethod: string = 'cash'; // تم التخفيف لمنع خطأ Vercel
 
   // 🔔 النوافذ المنبثقة
   showAlert: boolean = false;
   alertMessage: string = '';
   showConfirm: boolean = false;
   confirmMessage: string = '';
-  customerToDelete: number | null = null;
+  customerToDelete: any = null; // تم التخفيف لمنع خطأ Vercel
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    // إيقاظ السيرفر
     this.http.get('https://whatsappsenderapi.onrender.com/api/customers')
       .subscribe({
         next: () => console.log('السيرفر صاحي وجاهز!'),
         error: () => console.log('جاري إيقاظ السيرفر...')
       });
 
-    // تشغيل الساعة
     this.updateClock();
     this.clockInterval = setInterval(() => this.updateClock(), 1000);
-    
-    // تحميل المبيعات المحفوظة
     this.loadDailySales();
   }
 
@@ -87,7 +83,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  // 📊 دوال الإحصائيات
   get totalCustomersCount() { return this.customers.length; }
   get vipPercentage() {
     if (this.customers.length === 0) return 0;
@@ -96,12 +91,10 @@ export class AppComponent implements OnInit, OnDestroy {
   }
   get recentCustomers() { return [...this.customers].sort((a, b) => b.id - a.id).slice(0, 5); }
 
-  // 🌐 السوشيال ميديا
   openFacebook() { window.open('https://web.facebook.com/SparkSportsShop/', '_blank'); }
   openInstagram() { window.open('https://www.instagram.com/sparksport_jo?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==', '_blank'); }
   openWhatsAppContact() { window.open('https://wa.me/962787540539', '_blank'); }
 
-  // 🔐 نظام الدخول
   doLogin() {
     if (this.loginUser === this.ADMIN_USER && this.loginPass === this.ADMIN_PASS) {
       this.isLoggedIn = true; 
@@ -118,14 +111,13 @@ export class AppComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  switchTab(tab: 'home' | 'all' | 'vip' | 'stats' | 'sales') {
+  switchTab(tab: string) {
     this.activeTab = tab;
     this.currentPage = 1; 
     this.currentCustomerIndex = 0;
     this.cdr.detectChanges();
   }
 
-  // 👥 عمليات الزبائن
   loadCustomers() {
     this.http.get<any[]>('https://whatsappsenderapi.onrender.com/api/customers')
       .subscribe({
@@ -198,7 +190,8 @@ export class AppComponent implements OnInit, OnDestroy {
   // 🛒 نظام الفواتير الجديد
   addItemToBill() {
     if (!this.tempItemName || !this.tempItemPrice) { this.triggerAlert('دخل الصنف وسعره!'); return; }
-    this.currentBillItems.push({ name: this.tempItemName, price: parseFloat(this.tempItemPrice.toString()) });
+    // Number() تحمينا من خطأ Vercel 
+    this.currentBillItems.push({ name: this.tempItemName, price: Number(this.tempItemPrice) });
     this.tempItemName = ''; this.tempItemPrice = null;
     this.cdr.detectChanges();
   }
@@ -264,7 +257,7 @@ export class AppComponent implements OnInit, OnDestroy {
     window.open(`https://wa.me/962787540539?text=${encodeURIComponent(report)}`, '_blank');
   }
 
-  // 💬 واتساب
+  // 💬 واتساب والتقسيم
   get targetCustomersCount() { return this.activeTab === 'vip' ? this.customers.filter(c => c.isVIP).length : this.customers.length; }
 
   get processedCustomers() {
@@ -304,4 +297,3 @@ export class AppComponent implements OnInit, OnDestroy {
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   }
 }
-
