@@ -202,39 +202,86 @@
           </div>
         }
 
-        <!-- 📊 صفحة الإحصائيات -->
-        @else if (activeTab === 'stats') {
+@else if (activeTab === 'sales') {
           <div class="cards-grid">
-            <div class="glass-card text-center slide-up">
-              <h3 class="card-title m-0" style="color: #b28dff; border:none;">إجمالي الزبائن في النظام</h3>
-              <p style="font-size: 60px; font-weight: 900; color: #fff; margin: 20px 0; text-shadow: 0 0 20px rgba(142,68,173,0.8);">{{ totalCustomersCount }}</p>
-            </div>
             
-            <div class="glass-card text-center slide-up delay-1">
-              <h3 class="card-title m-0" style="color: #f1c40f; border:none;">نسبة كبار الشخصيات (VIP)</h3>
-              <p style="font-size: 60px; font-weight: 900; color: #fff; margin: 20px 0; text-shadow: 0 0 20px rgba(241,196,15,0.8);">{{ vipPercentage }}%</p>
+            <div class="glass-card slide-up" style="border-top-color: #25D366;">
+              <h3 class="card-title" style="color: #25D366;">ملخص مبيعات اليوم</h3>
+              <div style="display: flex; justify-content: space-between; padding: 10px 0;">
+                <span style="color: #a4b0be;">💵 كاش:</span>
+                <span style="font-weight: 900; color: #25D366;">{{ totalCash }} د.أ</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 10px 0;">
+                <span style="color: #a4b0be;">💳 فيزا:</span>
+                <span style="font-weight: 900; color: #3498db;">{{ totalVisa }} د.أ</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.1);">
+                <span style="font-size: 20px; font-weight: bold;">💰 المجموع:</span>
+                <span style="font-size: 20px; font-weight: 900; color: #f1c40f;">{{ totalSales }} د.أ</span>
+              </div>
+              <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button (click)="sendDailyReport()" class="btn-glow btn-wa w-100">إرسال لأبو هشام 📲</button>
+                <button (click)="clearDailySales()" class="btn-glow btn-danger w-100">تصفير 🔄</button>
+              </div>
+            </div>
+
+            <div class="glass-card slide-up delay-1" style="border-top-color: #f1c40f;">
+              <h3 class="card-title" style="color: #f1c40f;">🧾 إنشاء فاتورة جديدة</h3>
+              
+              <div style="display: flex; gap: 10px;">
+                <input type="text" [(ngModel)]="tempItemName" placeholder="اسم الصنف" class="glass-input" style="flex: 2;">
+                <input type="tel" inputmode="numeric" [(ngModel)]="tempItemPrice" placeholder="السعر" class="glass-input" style="flex: 1;">
+                <button (click)="addItemToBill()" class="btn-glow btn-gold" style="padding: 0 15px;">+</button>
+              </div>
+
+              @if (currentBillItems.length > 0) {
+                <div style="margin-top: 20px; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 10px;">
+                  @for (item of currentBillItems; track $index; let i = $index) {
+                    <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <span>{{ item.name }}</span>
+                      <span>{{ item.price }} د.أ <button (click)="removeItemFromCurrentBill(i)" style="background:none; border:none; color:#ff4757; cursor:pointer; margin-right:10px;">x</button></span>
+                    </div>
+                  }
+                  <div style="text-align: left; padding-top: 10px; font-weight: 900; color: #f1c40f;">
+                    المجموع الحالي: {{ currentBillTotal }} د.أ
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                  <button (click)="saleMethod = 'cash'" [style.opacity]="saleMethod === 'cash' ? '1' : '0.5'" class="btn-glow btn-wa w-100">💵 كاش</button>
+                  <button (click)="saleMethod = 'visa'" [style.opacity]="saleMethod === 'visa' ? '1' : '0.5'" class="btn-glow btn-purple w-100">💳 فيزا</button>
+                </div>
+                <button (click)="checkoutBill()" class="btn-glow btn-gold w-100 mt-2" style="font-size: 18px;">إصدار الفاتورة 🛒</button>
+              }
             </div>
           </div>
 
           <div class="glass-card table-card slide-up delay-2 mt-3">
-            <h3 class="card-title" style="padding-bottom: 20px;">🆕 أحدث 5 زبائن انضموا للمتجر</h3>
+            <h3 class="card-title">📄 سجل فواتير اليوم</h3>
             <div class="table-wrapper">
               <table class="glass-table">
                 <thead>
-                  <tr><th>الاسم</th><th>رقم الهاتف</th><th>التصنيف</th></tr>
+                  <tr><th>الوقت</th><th>التفاصيل</th><th>المجموع</th><th>الدفع</th><th>إجراء</th></tr>
                 </thead>
                 <tbody>
-                  @for (customer of recentCustomers; track customer.id) {
+                  @for (inv of dailySales; track inv.id) {
                     <tr class="table-row">
-                      <td class="font-bold text-white">{{ customer.name }}</td>
-                      <td class="text-spacing">{{ customer.phoneNumber }}</td>
-                      <td>
-                        @if (customer.isVIP) { <span class="vip-badge">⭐ VIP</span> }
-                        @else { <span style="color: #a4b0be; font-weight: bold;">عادي</span> }
+                      <td>{{ inv.time }}</td>
+                      <td style="text-align: right; font-size: 12px;">
+                        @for (item of inv.items; track $index) {
+                          <div>• {{ item.name }} ({{ item.price }} د.أ)</div>
+                        }
                       </td>
+                      <td style="color: #f1c40f; font-weight: 900;">{{ inv.total }} د.أ</td>
+                      <td>
+                        <span [style.color]="inv.method === 'cash' ? '#25D366' : '#3498db'">
+                          {{ inv.method === 'cash' ? '💵 كاش' : '💳 فيزا' }}
+                        </span>
+                      </td>
+                      <td><button (click)="deleteInvoice(inv.id)" class="action-btn btn-del">❌</button></td>
                     </tr>
                   } @empty {
-                    <tr><td colspan="3" class="empty-state">لا يوجد بيانات!</td></tr>
+                    <tr><td colspan="5" class="empty-state">لا يوجد فواتير مسجلة.</td></tr>
                   }
                 </tbody>
               </table>
