@@ -12,13 +12,24 @@
     </div>
   }
 
+<!-- 🔐 نافذة حماية الكاشير -->
   @if (showSalesPassModal) {
     <div class="glass-overlay">
       <div class="glass-modal alert-modal">
         <div class="modal-icon">🔐</div>
         <h3 class="modal-title">منطقة محمية</h3>
-        <p class="modal-text">الرجاء إدخال كلمة مرور الكاشير للوصول</p>
-        <input type="password" [(ngModel)]="salesInputPass" (keyup.enter)="verifySalesPass()" placeholder="****" class="glass-input text-center mt-2" style="letter-spacing: 10px; font-size: 24px;">
+        <p class="modal-text">الرجاء إدخال رمز الكاشير للوصول</p>
+        
+        <!-- التعديل هنا: استخدمنا inputmode="numeric" و pattern="[0-9]*" لفتح كيبورد الأرقام -->
+        <input 
+          type="password" 
+          inputmode="numeric" 
+          pattern="[0-9]*"
+          [(ngModel)]="salesInputPass" 
+          (keyup.enter)="verifySalesPass()" 
+          placeholder="****" 
+          class="glass-input text-center mt-2" 
+          style="letter-spacing: 10px; font-size: 24px;">
         
         <div style="display: flex; gap: 10px; margin-top: 20px;">
           <button (click)="verifySalesPass()" class="btn-glow btn-gold w-100">دخول</button>
