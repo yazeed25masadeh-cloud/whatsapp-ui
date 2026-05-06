@@ -227,6 +227,12 @@ export class AppComponent implements OnInit, OnDestroy {
     this.triggerAlert('تم إصدار الفاتورة! ✅');
   }
 
+  deleteInvoice(id: number) {
+    this.dailySales = this.dailySales.filter(s => s.id !== id);
+    this.saveDailySales();
+    this.cdr.detectChanges();
+  }
+
   loadDailySales() {
     const saved = localStorage.getItem('sparkDailySales');
     if (saved) this.dailySales = JSON.parse(saved);
@@ -298,3 +304,4 @@ export class AppComponent implements OnInit, OnDestroy {
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   }
 }
+
