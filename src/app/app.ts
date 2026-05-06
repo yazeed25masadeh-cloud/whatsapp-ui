@@ -18,6 +18,11 @@ export class AppComponent implements OnInit, OnDestroy {
   readonly ADMIN_USER = 'Spark2017';
   readonly ADMIN_PASS = 'WebSite';
 
+  // 🔐 حماية الكاشير
+  showSalesPassModal: boolean = false;
+  salesInputPass: string = '';
+  readonly SALES_PASS = '1122'; // حط الباسوورد اللي بدك إياه هون
+
   // 📝 متغيرات النظام (العملاء)
   customerName: string = '';
   customerPhone: string = '';
@@ -112,10 +117,33 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   switchTab(tab: string) {
+    // إذا كبس على الكاشير وهو مش أصلاً فيه، اطلب الباسوورد
+    if (tab === 'sales' && this.activeTab !== 'sales') {
+      this.showSalesPassModal = true;
+      this.salesInputPass = '';
+      return;
+    }
     this.activeTab = tab;
     this.currentPage = 1; 
     this.currentCustomerIndex = 0;
     this.cdr.detectChanges();
+  }
+
+  verifySalesPass() {
+    if (this.salesInputPass === this.SALES_PASS) {
+      this.showSalesPassModal = false;
+      this.activeTab = 'sales';
+      this.triggerAlert('تم الدخول بنجاح لمركز المبيعات ✅');
+    } else {
+      this.triggerAlert('كلمة مرور الكاشير غلط! ❌');
+      this.salesInputPass = '';
+    }
+    this.cdr.detectChanges();
+  }
+
+  closeSalesPassModal() {
+    this.showSalesPassModal = false;
+    this.salesInputPass = '';
   }
 
   loadCustomers() {
