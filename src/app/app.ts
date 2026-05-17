@@ -11,24 +11,23 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./app.css']
 })
 export class AppComponent implements OnInit, OnDestroy {
-  // 🔒 نظام الحماية
+  // 🔒 نظام الحماية والصلاحيات
   isLoggedIn: boolean = false;
+  userRole: string | null = null; 
   loginUser: string = '';
   loginPass: string = '';
+  
   readonly ADMIN_USER = 'Spark2017';
   readonly ADMIN_PASS = 'WebSite';
-
-  // 🔐 حماية الكاشير
-  showSalesPassModal: boolean = false;
-  salesInputPass: string = '';
-  readonly SALES_PASS = '1122'; // حط الباسوورد اللي بدك إياه هون
+  readonly CASHIER_USER = 'cash';
+  readonly CASHIER_PASS = '1122';
 
   // 📝 متغيرات النظام (العملاء)
   customerName: string = '';
   customerPhone: string = '';
   isVIP: boolean = false; 
   customers: any[] = []; 
-  editingCustomerId: any = null; // تم التخفيف لمنع خطأ Vercel
+  editingCustomerId: any = null; 
   
   // 🚀 متغيرات حملة الإرسال
   campName: string = '';
@@ -37,39 +36,54 @@ export class AppComponent implements OnInit, OnDestroy {
   campImageLink: string = ''; 
   currentCustomerIndex: number = 0;
 
-  // 🔍 البحث والتقسيم والـ Sidebar
+  // 🔍 البحث والتقسيم
   searchTerm: string = '';
   currentPage: number = 1;
   itemsPerPage: number = 50;
-  activeTab: string = 'home'; // تم التخفيف لمنع خطأ Vercel
+  activeTab: string = 'home'; 
 
   // 🕒 متغيرات الوقت والتاريخ
   currentTime: string = '';
   currentDate: string = '';
   clockInterval: any;
 
-  // 💰 متغيرات نظام الفواتير (صندوق المبيعات)
-  dailySales: any[] = []; 
-  currentBillItems: any[] = []; 
-  tempItemName: string = ''; 
-  tempItemPrice: any = null; // تم التخفيف لمنع خطأ Vercel
-  saleMethod: string = 'cash'; // تم التخفيف لمنع خطأ Vercel
-
-  // 🔔 النوافذ المنبثقة
+  // 🔔 النوافذ المنبثقة والتأكيد الموحد
   showAlert: boolean = false;
   alertMessage: string = '';
   showConfirm: boolean = false;
   confirmMessage: string = '';
-  customerToDelete: any = null; // تم التخفيف لمنع خطأ Vercel
+  confirmActionType: string = ''; // 'deleteCustomer' | 'clearSales'
+  customerToDelete: any = null; 
+
+  // =========================================
+  // 💰 متغيرات صندوق المبيعات المحدث (الكاشير)
+  // =========================================
+  dailySales: any[] = []; 
+  salesMode: string = 'sale'; // 'sale' | 'exchange' | 'return'
+  saleMethod: string = 'cash'; // 'cash' | 'visa' | 'cliq'
+
+  // 1. مبيع عادي
+  currentBillItems: any[] = []; 
+  tempItemName: string = ''; 
+  tempItemPrice: any = null; 
+
+  // 2. التبديل
+  exReturnedItems: any[] = [];
+  exNewItems: any[] = [];
+  exRetName: string = ''; exRetPrice: any = null;
+  exNewName: string = ''; exNewPrice: any = null;
+
+  // 3. الإرجاع
+  retItemName: string = '';
+  retItemPrice: any = null;
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    this.http.get('https://whatsappsenderapi.onrender.com/api/customers')
-      .subscribe({
-        next: () => console.log('السيرفر صاحي وجاهز!'),
-        error: () => console.log('جاري إيقاظ السيرفر...')
-      });
+    this.http.get('https://whatsappsenderapi.onrender.com/api/customers').subscribe({
+      next: () => console.log('السيرفر صاحي وجاهز!'),
+      error: () => console.log('جاري إيقاظ السيرفر...')
+    });
 
     this.updateClock();
     this.clockInterval = setInterval(() => this.updateClock(), 1000);
@@ -102,226 +116,225 @@ export class AppComponent implements OnInit, OnDestroy {
 
   doLogin() {
     if (this.loginUser === this.ADMIN_USER && this.loginPass === this.ADMIN_PASS) {
-      this.isLoggedIn = true; 
-      this.cdr.detectChanges(); 
-      this.loadCustomers();   
+      this.isLoggedIn = true; this.userRole = 'admin'; this.activeTab = 'home'; this.loadCustomers();   
+    } else if (this.loginUser === this.CASHIER_USER && this.loginPass === this.CASHIER_PASS) {
+      this.isLoggedIn = true; this.userRole = 'cashier'; this.activeTab = 'sales'; 
     } else {
-      this.triggerAlert('اسم المستخدم أو كلمة المرور غير صحيحة يا وحش!');
+      this.triggerAlert('اسم المستخدم أو كلمة المرور غير صحيحة!');
     }
+    this.cdr.detectChanges();
   }
 
   doLogout() {
-    this.isLoggedIn = false;
-    this.activeTab = 'home';
+    this.isLoggedIn = false; this.userRole = null; this.loginUser = ''; this.loginPass = ''; this.activeTab = 'home'; this.customers = [];
     this.cdr.detectChanges();
   }
 
   switchTab(tab: string) {
-    // إذا كبس على الكاشير وهو مش أصلاً فيه، اطلب الباسوورد
-    if (tab === 'sales' && this.activeTab !== 'sales') {
-      this.showSalesPassModal = true;
-      this.salesInputPass = '';
-      return;
-    }
-    this.activeTab = tab;
-    this.currentPage = 1; 
-    this.currentCustomerIndex = 0;
+    this.activeTab = tab; this.currentPage = 1; this.currentCustomerIndex = 0;
     this.cdr.detectChanges();
   }
 
-  verifySalesPass() {
-    if (this.salesInputPass === this.SALES_PASS) {
-      this.showSalesPassModal = false;
-      this.activeTab = 'sales';
-      this.triggerAlert('تم الدخول بنجاح لمركز المبيعات ✅');
-    } else {
-      this.triggerAlert('كلمة مرور الكاشير غلط! ❌');
-      this.salesInputPass = '';
-    }
-    this.cdr.detectChanges();
-  }
-
-  closeSalesPassModal() {
-    this.showSalesPassModal = false;
-    this.salesInputPass = '';
-  }
-
-  loadCustomers() {
-    this.http.get<any[]>('https://whatsappsenderapi.onrender.com/api/customers')
-      .subscribe({
-        next: (data) => { this.customers = data; this.cdr.detectChanges(); },
-        error: (err) => console.error(err)
+  // =========================================
+  // نظام التأكيد الموحد (للحذف والتصفير)
+  // =========================================
+  executeConfirmAction() {
+    if (this.confirmActionType === 'deleteCustomer' && this.customerToDelete) {
+      this.http.delete(`https://whatsappsenderapi.onrender.com/api/customers/${this.customerToDelete}`).subscribe({
+        next: () => { this.loadCustomers(); this.showConfirm = false; this.cdr.detectChanges(); },
+        error: () => { this.showConfirm = false; this.triggerAlert('خطأ بالحذف!'); }
       });
-  }
-
-  editCustomer(customer: any) {
-    this.editingCustomerId = customer.id;
-    this.customerName = customer.name;
-    this.customerPhone = customer.phoneNumber;
-    this.isVIP = customer.isVIP || false; 
-    if (this.activeTab !== 'all' && this.activeTab !== 'vip') this.switchTab('all');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  saveCustomer() {
-    if (!this.customerName || !this.customerPhone) {
-      this.triggerAlert('دخل البيانات كاملة!'); return;
-    }
-
-    const customerData = { 
-      name: this.customerName, 
-      phoneNumber: this.customerPhone, 
-      isVIP: this.isVIP 
-    };
-
-    if (this.editingCustomerId) {
-      this.http.put<any>(`https://whatsappsenderapi.onrender.com/api/customers/${this.editingCustomerId}`, customerData)
-        .subscribe({
-          next: () => { this.loadCustomers(); this.cancelEdit(); this.triggerAlert('تم التعديل بنجاح!'); },
-          error: (err) => console.error(err)
-        });
-    } else {
-      this.http.post<any>('https://whatsappsenderapi.onrender.com/api/customers', customerData)
-        .subscribe({
-          next: () => { this.loadCustomers(); this.cancelEdit(); this.triggerAlert('تمت الإضافة!'); },
-          error: (err) => console.error(err)
-        });
+    } else if (this.confirmActionType === 'clearSales') {
+      this.dailySales = [];
+      this.saveDailySales();
+      this.showConfirm = false;
+      this.triggerAlert('تم تصفير الصندوق وبدء يوم جديد! 🚀');
     }
   }
 
-  cancelEdit() {
-    this.editingCustomerId = null;
-    this.customerName = ''; this.customerPhone = ''; this.isVIP = false;
-    this.cdr.detectChanges();
-  }
-
-  askDelete(id: number) {
-    this.customerToDelete = id;
-    this.confirmMessage = 'متأكد بدك تمسح الزبون؟';
-    this.showConfirm = true;
-  }
-
-  confirmDelete() {
-    if (this.customerToDelete) {
-      this.http.delete(`https://whatsappsenderapi.onrender.com/api/customers/${this.customerToDelete}`)
-        .subscribe({
-          next: () => { this.loadCustomers(); this.showConfirm = false; this.cdr.detectChanges(); },
-          error: (err) => { this.showConfirm = false; this.triggerAlert('خطأ بالحذف!'); }
-        });
-    }
-  }
-
-  cancelDelete() { this.showConfirm = false; }
+  cancelConfirm() { this.showConfirm = false; }
   triggerAlert(msg: string) { this.alertMessage = msg; this.showAlert = true; }
   closeAlert() { this.showAlert = false; }
 
-  // 🛒 نظام الفواتير الجديد
+  // =========================================
+  // 💳 نظام الكاشير والفواتير (مبيع، تبديل، إرجاع)
+  // =========================================
+  setSalesMode(mode: string) { this.salesMode = mode; this.cdr.detectChanges(); }
+
+  // 1. المبيع العادي
   addItemToBill() {
     if (!this.tempItemName || !this.tempItemPrice) { this.triggerAlert('دخل الصنف وسعره!'); return; }
-    // Number() تحمينا من خطأ Vercel 
-    this.currentBillItems.push({ name: this.tempItemName, price: Number(this.tempItemPrice) });
+    this.currentBillItems.push({ name: this.tempItemName, price: Number(this.tempItemPrice), isReturn: false });
     this.tempItemName = ''; this.tempItemPrice = null;
-    this.cdr.detectChanges();
+  }
+  removeBillItem(i: number) { this.currentBillItems.splice(i, 1); }
+  get currentBillTotal() { return this.currentBillItems.reduce((s, i) => s + i.price, 0); }
+  
+  checkoutSale() {
+    if (this.currentBillItems.length === 0) return;
+    this.saveInvoice('مبيع', [...this.currentBillItems], this.currentBillTotal);
+    this.currentBillItems = [];
   }
 
-  removeItemFromCurrentBill(index: number) {
-    this.currentBillItems.splice(index, 1);
-    this.cdr.detectChanges();
+  // 2. نظام التبديل
+  addExReturnItem() {
+    if (!this.exRetName || !this.exRetPrice) { this.triggerAlert('دخل الصنف المسترجع وسعره!'); return; }
+    this.exReturnedItems.push({ name: this.exRetName, price: Number(this.exRetPrice), isReturn: true });
+    this.exRetName = ''; this.exRetPrice = null;
+  }
+  addExNewItem() {
+    if (!this.exNewName || !this.exNewPrice) { this.triggerAlert('دخل الصنف الجديد وسعره!'); return; }
+    this.exNewItems.push({ name: this.exNewName, price: Number(this.exNewPrice), isReturn: false });
+    this.exNewName = ''; this.exNewPrice = null;
+  }
+  removeExRet(i: number) { this.exReturnedItems.splice(i, 1); }
+  removeExNew(i: number) { this.exNewItems.splice(i, 1); }
+  get exchangeNetTotal() {
+    let retSum = this.exReturnedItems.reduce((s, i) => s + i.price, 0);
+    let newSum = this.exNewItems.reduce((s, i) => s + i.price, 0);
+    return newSum - retSum; // إذا موجب الزبون بيدفع، إذا سالب إحنا بندفعله
   }
 
-  get currentBillTotal() {
-    return this.currentBillItems.reduce((sum, item) => sum + item.price, 0);
+  checkoutExchange() {
+    if (this.exReturnedItems.length === 0 && this.exNewItems.length === 0) return;
+    let allItems = [...this.exReturnedItems, ...this.exNewItems];
+    this.saveInvoice('تبديل', allItems, this.exchangeNetTotal);
+    this.exReturnedItems = []; this.exNewItems = [];
   }
 
-  checkoutBill() {
-    if (this.currentBillItems.length === 0) { this.triggerAlert('الفاتورة فاضية!'); return; }
+  // 3. نظام الإرجاع
+  checkoutReturn() {
+    if (!this.retItemName || !this.retItemPrice) { this.triggerAlert('دخل الصنف والسعر!'); return; }
+    let item = { name: this.retItemName, price: Number(this.retItemPrice), isReturn: true };
+    this.saveInvoice('إرجاع', [item], -Number(this.retItemPrice));
+    this.retItemName = ''; this.retItemPrice = null;
+  }
+
+  // الحفظ العام للفاتورة
+  private saveInvoice(typeDesc: string, items: any[], total: number) {
     const newInvoice = {
       id: Date.now(),
-      items: [...this.currentBillItems],
-      total: this.currentBillTotal,
+      typeDesc: typeDesc,
+      items: items,
+      total: total,
       method: this.saleMethod,
       time: new Date().toLocaleTimeString('ar-JO', { hour: '2-digit', minute: '2-digit' })
     };
     this.dailySales.unshift(newInvoice);
     this.saveDailySales();
-    this.currentBillItems = [];
-    this.triggerAlert('تم إصدار الفاتورة! ✅');
+    this.triggerAlert(`تم إصدار فاتورة (${typeDesc}) بنجاح! ✅`);
+    this.cdr.detectChanges();
   }
 
   deleteInvoice(id: number) {
     this.dailySales = this.dailySales.filter(s => s.id !== id);
     this.saveDailySales();
-    this.cdr.detectChanges();
   }
 
+  // دوال الذاكرة والتصفير
   loadDailySales() {
     const saved = localStorage.getItem('sparkDailySales');
     if (saved) this.dailySales = JSON.parse(saved);
   }
+  saveDailySales() { localStorage.setItem('sparkDailySales', JSON.stringify(this.dailySales)); }
 
-  saveDailySales() {
-    localStorage.setItem('sparkDailySales', JSON.stringify(this.dailySales));
+  askClearSales() {
+    if (this.dailySales.length === 0) { this.triggerAlert('الصندوق فاضي أصلاً!'); return; }
+    this.confirmActionType = 'clearSales';
+    this.confirmMessage = 'متأكد بدك تصفر صندوق اليوم؟ (هاي الحركة ما بتتراجع)';
+    this.showConfirm = true;
   }
 
-  clearDailySales() {
-    this.dailySales = [];
-    this.saveDailySales();
-    this.triggerAlert('تم تصفير الصندوق!');
-  }
-
+  // العدادات والتقرير (تم إضافة كليك)
   get totalCash() { return this.dailySales.filter(s => s.method === 'cash').reduce((sum, s) => sum + s.total, 0); }
   get totalVisa() { return this.dailySales.filter(s => s.method === 'visa').reduce((sum, s) => sum + s.total, 0); }
-  get totalSales() { return this.totalCash + this.totalVisa; }
+  get totalCliq() { return this.dailySales.filter(s => s.method === 'cliq').reduce((sum, s) => sum + s.total, 0); }
+  get totalSales() { return this.totalCash + this.totalVisa + this.totalCliq; }
 
   sendDailyReport() {
-    if (this.dailySales.length === 0) { this.triggerAlert('ما في فواتير!'); return; }
+    if (this.dailySales.length === 0) { this.triggerAlert('ما في مبيعات لليوم!'); return; }
     let report = `*📊 تقرير مبيعات Spark Sport*\nالتاريخ: ${this.currentDate}\n\n`;
-    report += `💵 كاش: ${this.totalCash} د.أ\n💳 فيزا: ${this.totalVisa} د.أ\n💰 الإجمالي: ${this.totalSales} د.أ\n\n`;
+    report += `💵 كاش: ${this.totalCash} د.أ\n💳 فيزا: ${this.totalVisa} د.أ\n📱 كليك: ${this.totalCliq} د.أ\n💰 إجمالي الصندوق: ${this.totalSales} د.أ\n\n--------------------------\n`;
+    
     [...this.dailySales].reverse().forEach((inv, idx) => {
-      report += `*فاتورة #${idx + 1}* [${inv.time}]\n`;
-      inv.items.forEach((item: any) => { report += `- ${item.name}: ${item.price} د.أ\n`; });
-      report += `🔹 المجموع: ${inv.total} (${inv.method === 'cash' ? 'كاش' : 'فيزا'})\n\n`;
+      report += `*فاتورة #${idx + 1}* [${inv.typeDesc}] - ${inv.time}\n`;
+      inv.items.forEach((item: any) => { 
+        let mark = item.isReturn ? '🔄 [مسترجع]' : '🛒';
+        report += `${mark} ${item.name}: ${item.price} د.أ\n`; 
+      });
+      let payMethod = inv.method === 'cash' ? 'كاش' : (inv.method === 'visa' ? 'فيزا' : 'كليك');
+      report += `🔹 الصافي: ${inv.total} د.أ (${payMethod})\n\n`;
     });
     window.open(`https://wa.me/962787540539?text=${encodeURIComponent(report)}`, '_blank');
   }
 
-  // 💬 واتساب والتقسيم
-  get targetCustomersCount() { return this.activeTab === 'vip' ? this.customers.filter(c => c.isVIP).length : this.customers.length; }
-
-  get processedCustomers() {
-    let filtered = this.customers;
-    if (this.activeTab === 'vip') filtered = filtered.filter(c => c.isVIP);
-    if (this.searchTerm.trim() !== '') filtered = filtered.filter(c => c.phoneNumber.includes(this.searchTerm.trim()));
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    return filtered.slice(startIndex, startIndex + this.itemsPerPage);
+  // =========================================
+  // 👥 بقية دوال العملاء والواتساب
+  // =========================================
+  loadCustomers() {
+    this.http.get<any[]>('https://whatsappsenderapi.onrender.com/api/customers').subscribe({
+      next: (data) => { this.customers = data; this.cdr.detectChanges(); },
+      error: (err) => console.error(err)
+    });
   }
 
+  editCustomer(customer: any) {
+    this.editingCustomerId = customer.id; this.customerName = customer.name; this.customerPhone = customer.phoneNumber; this.isVIP = customer.isVIP || false; 
+    if (this.activeTab !== 'all' && this.activeTab !== 'vip') this.switchTab('all');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  saveCustomer() {
+    if (!this.customerName || !this.customerPhone) { this.triggerAlert('دخل البيانات!'); return; }
+    const customerData = { name: this.customerName, phoneNumber: this.customerPhone, isVIP: this.isVIP };
+    if (this.editingCustomerId) {
+      this.http.put<any>(`https://whatsappsenderapi.onrender.com/api/customers/${this.editingCustomerId}`, customerData).subscribe({
+        next: () => { this.loadCustomers(); this.cancelEdit(); this.triggerAlert('تم التعديل!'); }
+      });
+    } else {
+      this.http.post<any>('https://whatsappsenderapi.onrender.com/api/customers', customerData).subscribe({
+        next: () => { this.loadCustomers(); this.cancelEdit(); this.triggerAlert('تمت الإضافة!'); }
+      });
+    }
+  }
+
+  cancelEdit() { this.editingCustomerId = null; this.customerName = ''; this.customerPhone = ''; this.isVIP = false; }
+  
+  askDelete(id: number) {
+    this.customerToDelete = id;
+    this.confirmActionType = 'deleteCustomer';
+    this.confirmMessage = 'متأكد بدك تمسح الزبون؟';
+    this.showConfirm = true;
+  }
+
+  get targetCustomersCount() { return this.activeTab === 'vip' ? this.customers.filter(c => c.isVIP).length : this.customers.length; }
+  get processedCustomers() {
+    let filtered = this.activeTab === 'vip' ? this.customers.filter(c => c.isVIP) : this.customers;
+    if (this.searchTerm.trim() !== '') filtered = filtered.filter(c => c.phoneNumber.includes(this.searchTerm.trim()));
+    return filtered.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
+  }
   get totalPages() {
-    let filtered = this.customers;
-    if (this.activeTab === 'vip') filtered = filtered.filter(c => c.isVIP);
+    let filtered = this.activeTab === 'vip' ? this.customers.filter(c => c.isVIP) : this.customers;
     if (this.searchTerm.trim() !== '') filtered = filtered.filter(c => c.phoneNumber.includes(this.searchTerm.trim()));
     return Math.ceil(filtered.length / this.itemsPerPage) || 1;
   }
-
   nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; }
   prevPage() { if (this.currentPage > 1) this.currentPage--; }
   onSearchChange() { this.currentPage = 1; }
 
-  sendSingleWhatsApp(customer: any) { this.executeWhatsApp(customer); }
-
-  sendBulkWhatsApp() {
-    if (!this.campName || !this.campPrice) { this.triggerAlert('عبي بيانات المنتج!'); return; }
-    let targetCustomers = this.activeTab === 'vip' ? this.customers.filter(c => c.isVIP) : this.customers;
-    if (this.currentCustomerIndex >= targetCustomers.length) {
-      this.triggerAlert('🎉 خلصنا الإرسال!'); this.currentCustomerIndex = 0; return;
-    }
-    this.executeWhatsApp(targetCustomers[this.currentCustomerIndex]);
-    this.currentCustomerIndex++;
+  sendSingleWhatsApp(customer: any) {
+    let msg = `مرحبا ${customer.name}\nمتجر SPARK SPORT ⚡`;
+    let phone = customer.phoneNumber.startsWith('0') ? '962' + customer.phoneNumber.substring(1) : customer.phoneNumber;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   }
 
-  private executeWhatsApp(customer: any) {
-    let message = `مرحبا ${customer.name}\nمتجر SPARK SPORT ⚡\n\n*منتج:* ${this.campName}\n*سعر:* ${this.campPrice}\n${this.campDesc}`;
-    let phone = customer.phoneNumber.startsWith('0') ? '962' + customer.phoneNumber.substring(1) : customer.phoneNumber;
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+  sendBulkWhatsApp() {
+    if (!this.campName || !this.campPrice) { this.triggerAlert('عبي المنتج!'); return; }
+    let target = this.activeTab === 'vip' ? this.customers.filter(c => c.isVIP) : this.customers;
+    if (this.currentCustomerIndex >= target.length) { this.triggerAlert('🎉 خلصنا الإرسال!'); this.currentCustomerIndex = 0; return; }
+    let msg = `مرحبا ${target[this.currentCustomerIndex].name}\nمتجر SPARK SPORT ⚡\n\n*منتج:* ${this.campName}\n*سعر:* ${this.campPrice}\n${this.campDesc}`;
+    let phone = target[this.currentCustomerIndex].phoneNumber.startsWith('0') ? '962' + target[this.currentCustomerIndex].phoneNumber.substring(1) : target[this.currentCustomerIndex].phoneNumber;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    this.currentCustomerIndex++;
   }
 }
