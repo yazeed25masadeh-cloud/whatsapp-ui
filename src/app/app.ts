@@ -87,15 +87,22 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit() {
-    this.http.get('https://whatsappsenderapi.onrender.com/api/customers').subscribe({
-      next: () => console.log('السيرفر صاحي وجاهز!'),
-      error: () => console.log('جاري إيقاظ السيرفر...')
-    });
+ngOnInit() {
+    this.checkServer(); // استدعاء أول مرة
+    // عمل "نبضة قلب" كل 5 دقائق عشان ما ينام السيرفر
+    setInterval(() => this.checkServer(), 300000); 
 
     this.updateClock();
     this.clockInterval = setInterval(() => this.updateClock(), 1000);
     this.loadDailySales();
+  }
+
+  checkServer() {
+    this.http.get('https://whatsappsenderapi.onrender.com/api/customers')
+      .subscribe({
+        next: () => console.log('السيرفر صاحي!'),
+        error: () => console.log('جاري إيقاظ السيرفر...')
+      });
   }
 
   ngOnDestroy() {
