@@ -63,6 +63,7 @@
       <aside class="glass-sidebar">
         @if (userRole === 'admin') {
           <button (click)="switchTab('home')" class="sidebar-btn" [class.active]="activeTab === 'home'">🏠 الصفحة الرئيسية</button>
+          <button (click)="switchTab('loyalty')" class="sidebar-btn" [class.active]="activeTab === 'loyalty'" style="border-left: 4px solid #f1c40f;">🎁 نظام الولاء والنقاط</button>
           <button (click)="switchTab('all')" class="sidebar-btn" [class.active]="activeTab === 'all'">👥 السجل الشامل</button>
           <button (click)="switchTab('vip')" class="sidebar-btn vip-btn" [class.active-vip]="activeTab === 'vip'"><span class="pulse-anim inline-block">⭐</span> الزبائن المميزين</button>
           <button (click)="switchTab('stats')" class="sidebar-btn" [class.active]="activeTab === 'stats'">📊 الإحصائيات الذكية</button>
@@ -89,6 +90,63 @@
               <button (click)="openFacebook()" class="btn-glow" style="background: #1877F2; border: none; padding: 15px 30px; font-size: 18px;">Facebook 📘</button>
               <button (click)="openInstagram()" class="btn-glow" style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); border: none; padding: 15px 30px; font-size: 18px;">Instagram 📸</button>
               <button (click)="openWhatsAppContact()" class="btn-glow" style="background: #25D366; border: none; padding: 15px 30px; font-size: 18px; color: #000;">WhatsApp 💬</button>
+            </div>
+          </div>
+        }
+
+        @else if (activeTab === 'loyalty') {
+          <div class="cards-grid">
+            <div class="glass-card slide-up" style="border-top-color: #f1c40f;">
+              <h3 class="card-title" style="color: #f1c40f;">🎁 تسجيل فاتورة ونقاط</h3>
+              
+              <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <input type="tel" inputmode="numeric" [(ngModel)]="loyaltySearchPhone" (input)="searchLoyaltyCustomer()" placeholder="🔍 أدخل رقم هاتف الزبون..." class="glass-input text-right" style="flex: 1;" dir="ltr">
+              </div>
+
+              @if (loyaltyCustomer) {
+                <div style="background: rgba(37,211,102,0.1); border: 1px solid #25D366; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                  <h4 style="color: #25D366; margin: 0 0 10px 0;">✅ الزبون مسجل مسبقاً</h4>
+                  <p style="color: #fff; font-size: 18px; font-weight: bold; margin: 0 0 5px 0;">
+                    {{ loyaltyCustomer.name }} 
+                    @if (loyaltyCustomer.isVIP) { <span class="vip-badge">⭐ VIP</span> }
+                  </p>
+                  <p style="color: #f1c40f; font-weight: bold; margin: 0;">النقاط الحالية: {{ loyaltyCustomer.points || 0 }} نقطة</p>
+                </div>
+              } @else if (loyaltyCustomer === undefined) {
+                <div style="background: rgba(52,152,219,0.1); border: 1px solid #3498db; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                  <h4 style="color: #3498db; margin: 0 0 10px 0;">🆕 زبون جديد</h4>
+                  <input type="text" [(ngModel)]="loyaltyNewCustomerName" placeholder="أدخل اسم الزبون الجديد..." class="glass-input">
+                </div>
+              }
+
+              @if (loyaltyCustomer !== null) {
+                <div style="display: flex; gap: 10px; flex-direction: column;">
+                  <input type="tel" inputmode="numeric" [(ngModel)]="loyaltyInvoiceAmount" placeholder="قيمة الفاتورة الجديدة (بالدينار)" class="glass-input">
+                  <button (click)="processLoyalty()" class="btn-glow btn-gold w-100 mt-2">تسجيل الفاتورة واحتساب النقاط 🌟</button>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="glass-card table-card slide-up delay-1 mt-3">
+            <h3 class="card-title m-0">🏆 ترتيب الزبائن حسب النقاط</h3>
+            <div class="table-wrapper mt-3">
+              <table class="glass-table">
+                <thead><tr><th>الترتيب</th><th>الاسم</th><th>رقم الهاتف</th><th>النقاط</th></tr></thead>
+                <tbody>
+                  @for (customer of sortedLoyaltyCustomers; track customer.id; let i = $index) {
+                    <tr class="table-row">
+                      <td class="text-highlight font-bold">{{ i + 1 }}</td>
+                      <td class="font-bold text-white">
+                        {{ customer.name }} 
+                        @if (customer.isVIP) { <span class="vip-badge">⭐ VIP</span> }
+                      </td>
+                      <td class="text-spacing">{{ customer.phoneNumber }}</td>
+                      <td style="color: #f1c40f; font-weight: bold; font-size: 18px;">{{ customer.points || 0 }} 🌟</td>
+                    </tr>
+                  } @empty { <tr><td colspan="4" class="empty-state">لا يوجد بيانات!</td></tr> }
+                </tbody>
+              </table>
             </div>
           </div>
         }
