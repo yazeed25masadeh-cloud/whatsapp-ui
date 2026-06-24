@@ -62,6 +62,12 @@ export class AppComponent implements OnInit, OnDestroy {
   salesMode: string = 'sale'; // 'sale' | 'exchange' | 'return'
   saleMethod: string = 'cash'; // 'cash' | 'visa' | 'cliq'
 
+  // 📦 متغيرات الكمية
+  tempItemQty: number = 1; 
+  exRetQty: number = 1;
+  exNewQty: number = 1;
+  retItemQty: number = 1;
+
   // 1. مبيع عادي
   currentBillItems: any[] = []; 
   tempItemName: string = ''; 
@@ -161,11 +167,12 @@ export class AppComponent implements OnInit, OnDestroy {
   // =========================================
   setSalesMode(mode: string) { this.salesMode = mode; this.cdr.detectChanges(); }
 
-  // 1. المبيع العادي
+// 1. المبيع العادي
   addItemToBill() {
     if (!this.tempItemName || !this.tempItemPrice) { this.triggerAlert('دخل الصنف وسعره!'); return; }
-    this.currentBillItems.push({ name: this.tempItemName, price: Number(this.tempItemPrice), isReturn: false });
-    this.tempItemName = ''; this.tempItemPrice = null;
+    let totalItemPrice = Number(this.tempItemPrice) * this.tempItemQty; // ضرب السعر بالكمية
+    this.currentBillItems.push({ name: this.tempItemName, price: totalItemPrice, qty: this.tempItemQty, isReturn: false });
+    this.tempItemName = ''; this.tempItemPrice = null; this.tempItemQty = 1; // تصفير مع إرجاع الكمية لـ 1
   }
   removeBillItem(i: number) { this.currentBillItems.splice(i, 1); }
   get currentBillTotal() { return this.currentBillItems.reduce((s, i) => s + i.price, 0); }
@@ -176,16 +183,18 @@ export class AppComponent implements OnInit, OnDestroy {
     this.currentBillItems = [];
   }
 
-  // 2. نظام التبديل
+// 2. نظام التبديل
   addExReturnItem() {
     if (!this.exRetName || !this.exRetPrice) { this.triggerAlert('دخل الصنف المسترجع وسعره!'); return; }
-    this.exReturnedItems.push({ name: this.exRetName, price: Number(this.exRetPrice), isReturn: true });
-    this.exRetName = ''; this.exRetPrice = null;
+    let total = Number(this.exRetPrice) * this.exRetQty;
+    this.exReturnedItems.push({ name: this.exRetName, price: total, qty: this.exRetQty, isReturn: true });
+    this.exRetName = ''; this.exRetPrice = null; this.exRetQty = 1;
   }
-  addExNewItem() {
+addExNewItem() {
     if (!this.exNewName || !this.exNewPrice) { this.triggerAlert('دخل الصنف الجديد وسعره!'); return; }
-    this.exNewItems.push({ name: this.exNewName, price: Number(this.exNewPrice), isReturn: false });
-    this.exNewName = ''; this.exNewPrice = null;
+    let total = Number(this.exNewPrice) * this.exNewQty;
+    this.exNewItems.push({ name: this.exNewName, price: total, qty: this.exNewQty, isReturn: false });
+    this.exNewName = ''; this.exNewPrice = null; this.exNewQty = 1;
   }
   removeExRet(i: number) { this.exReturnedItems.splice(i, 1); }
   removeExNew(i: number) { this.exNewItems.splice(i, 1); }
@@ -202,12 +211,13 @@ export class AppComponent implements OnInit, OnDestroy {
     this.exReturnedItems = []; this.exNewItems = [];
   }
 
-  // 3. نظام الإرجاع
+// 3. نظام الإرجاع
   checkoutReturn() {
     if (!this.retItemName || !this.retItemPrice) { this.triggerAlert('دخل الصنف والسعر!'); return; }
-    let item = { name: this.retItemName, price: Number(this.retItemPrice), isReturn: true };
-    this.saveInvoice('إرجاع', [item], -Number(this.retItemPrice));
-    this.retItemName = ''; this.retItemPrice = null;
+    let total = Number(this.retItemPrice) * this.retItemQty;
+    let item = { name: this.retItemName, price: total, qty: this.retItemQty, isReturn: true };
+    this.saveInvoice('إرجاع', [item], -total);
+    this.retItemName = ''; this.retItemPrice = null; this.retItemQty = 1;
   }
 
   // الحفظ العام للفاتورة
@@ -256,11 +266,12 @@ export class AppComponent implements OnInit, OnDestroy {
     let report = `*📊 تقرير مبيعات Spark Sport*\nالتاريخ: ${this.currentDate}\n\n`;
     report += `💵 كاش: ${this.totalCash} د.أ\n💳 فيزا: ${this.totalVisa} د.أ\n📱 كليك: ${this.totalCliq} د.أ\n💰 إجمالي الصندوق: ${this.totalSales} د.أ\n\n--------------------------\n`;
     
-    [...this.dailySales].reverse().forEach((inv, idx) => {
+[...this.dailySales].reverse().forEach((inv, idx) => {
       report += `*فاتورة #${idx + 1}* [${inv.typeDesc}] - ${inv.time}\n`;
       inv.items.forEach((item: any) => { 
         let mark = item.isReturn ? '🔄 [مسترجع]' : '🛒';
-        report += `${mark} ${item.name}: ${item.price} د.أ\n`; 
+        let qtyText = item.qty ? `(${item.qty}x) ` : ''; // إضافة الكمية للرسالة
+        report += `${mark} ${qtyText}${item.name}: ${item.price} د.أ\n`; 
       });
       let payMethod = inv.method === 'cash' ? 'كاش' : (inv.method === 'visa' ? 'فيزا' : 'كليك');
       report += `🔹 الصافي: ${inv.total} د.أ (${payMethod})\n\n`;

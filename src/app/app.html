@@ -80,7 +80,6 @@
               <img src="logo.jpg" alt="SPARK SPORT" class="brand-logo" onerror="this.src='assets/logo.jpg'" style="width: 120px; height: 120px;">
             </div>
             <h2 class="neon-text" style="font-size: 40px; margin-bottom: 10px;">أهلاً بك في نظام SPARK SPORT</h2>
-            <h3 style="color: #f1c40f; font-size: 24px; font-weight: 900;">المدير العام: أبو هشام أخميس الغالي 👑</h3>
             <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 20px; margin: 40px 0; border: 1px solid rgba(255,255,255,0.1);">
               <p style="font-size: 22px; color: #a4b0be; font-weight: bold;">{{ currentDate }}</p>
               <p style="font-size: 55px; font-weight: 900; color: #fff; letter-spacing: 3px; margin: 10px 0;">{{ currentTime }}</p>
@@ -128,13 +127,16 @@
                 <div style="display: flex; gap: 10px;">
                   <input type="text" [(ngModel)]="tempItemName" placeholder="اسم الصنف" class="glass-input" style="flex: 2;">
                   <input type="tel" inputmode="numeric" [(ngModel)]="tempItemPrice" placeholder="السعر" class="glass-input" style="flex: 1;">
+                  <input type="number" [(ngModel)]="tempItemQty" min="1" placeholder="الكمية" class="glass-input" style="width: 70px; text-align: center;">
                   <button (click)="addItemToBill()" class="btn-glow btn-gold" style="padding: 0 15px;">+</button>
                 </div>
+
                 @if (currentBillItems.length > 0) {
                   <div style="margin-top: 20px; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 10px;">
                     @for (item of currentBillItems; track $index; let i = $index) {
                       <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <span>{{ item.name }}</span><span>{{ item.price }} د.أ <button (click)="removeBillItem(i)" style="background:none; border:none; color:#ff4757; cursor:pointer;">x</button></span>
+                        <span>{{ item.qty ? item.qty + 'x ' : '' }}{{ item.name }}</span>
+                        <span>{{ item.price }} د.أ <button (click)="removeBillItem(i)" style="background:none; border:none; color:#ff4757; cursor:pointer; margin-right:10px;">x</button></span>
                       </div>
                     }
                     <div style="text-align: left; padding-top: 10px; font-weight: 900; color: #f1c40f;">المجموع: {{ currentBillTotal }} د.أ</div>
@@ -153,15 +155,17 @@
                 
                 <label style="color: #ff4757; font-weight: bold; font-size: 14px;">1. البضاعة المسترجعة (اللي رجعها الزبون):</label>
                 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                  <input type="text" [(ngModel)]="exRetName" placeholder="صنف مسترجع" class="glass-input" style="border-color: rgba(255,71,87,0.5);">
+                  <input type="text" [(ngModel)]="exRetName" placeholder="صنف مسترجع" class="glass-input" style="border-color: rgba(255,71,87,0.5); flex: 2;">
                   <input type="tel" inputmode="numeric" [(ngModel)]="exRetPrice" placeholder="سعره" class="glass-input" style="width: 80px;">
+                  <input type="number" [(ngModel)]="exRetQty" min="1" placeholder="كمية" class="glass-input" style="width: 60px; text-align: center;">
                   <button (click)="addExReturnItem()" class="btn-glow btn-danger">+</button>
                 </div>
 
                 <label style="color: #25D366; font-weight: bold; font-size: 14px;">2. البضاعة الجديدة (اللي أخذها الزبون):</label>
                 <div style="display: flex; gap: 10px;">
-                  <input type="text" [(ngModel)]="exNewName" placeholder="صنف جديد" class="glass-input" style="border-color: rgba(37,211,102,0.5);">
+                  <input type="text" [(ngModel)]="exNewName" placeholder="صنف جديد" class="glass-input" style="border-color: rgba(37,211,102,0.5); flex: 2;">
                   <input type="tel" inputmode="numeric" [(ngModel)]="exNewPrice" placeholder="سعره" class="glass-input" style="width: 80px;">
+                  <input type="number" [(ngModel)]="exNewQty" min="1" placeholder="كمية" class="glass-input" style="width: 60px; text-align: center;">
                   <button (click)="addExNewItem()" class="btn-glow btn-wa">+</button>
                 </div>
 
@@ -169,12 +173,14 @@
                   <div style="margin-top: 20px; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 10px;">
                     @for (item of exReturnedItems; track $index; let i = $index) {
                       <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ff4757;">
-                        <span>🔄 {{ item.name }}</span><span>{{ item.price }} د.أ <button (click)="removeExRet(i)" style="background:none; border:none; color:#a4b0be;">x</button></span>
+                        <span>🔄 {{ item.qty ? item.qty + 'x ' : '' }}{{ item.name }}</span>
+                        <span>{{ item.price }} د.أ <button (click)="removeExRet(i)" style="background:none; border:none; color:#a4b0be; margin-right:10px;">x</button></span>
                       </div>
                     }
                     @for (item of exNewItems; track $index; let i = $index) {
                       <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #25D366;">
-                        <span>🛒 {{ item.name }}</span><span>{{ item.price }} د.أ <button (click)="removeExNew(i)" style="background:none; border:none; color:#a4b0be;">x</button></span>
+                        <span>🛒 {{ item.qty ? item.qty + 'x ' : '' }}{{ item.name }}</span>
+                        <span>{{ item.price }} د.أ <button (click)="removeExNew(i)" style="background:none; border:none; color:#a4b0be; margin-right:10px;">x</button></span>
                       </div>
                     }
                     <div style="text-align: left; padding-top: 10px; font-weight: 900;" [style.color]="exchangeNetTotal < 0 ? '#ff4757' : '#f1c40f'">
@@ -197,6 +203,7 @@
                 <div style="display: flex; gap: 10px;">
                   <input type="text" [(ngModel)]="retItemName" placeholder="الصنف المرجع" class="glass-input" style="flex: 2;">
                   <input type="tel" inputmode="numeric" [(ngModel)]="retItemPrice" placeholder="قيمة الإرجاع" class="glass-input" style="flex: 1;">
+                  <input type="number" [(ngModel)]="retItemQty" min="1" placeholder="الكمية" class="glass-input" style="width: 70px; text-align: center;">
                 </div>
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                   <button (click)="saleMethod = 'cash'" [style.opacity]="saleMethod === 'cash' ? '1' : '0.4'" class="btn-glow btn-wa w-100">💵 من الكاش</button>
@@ -220,7 +227,7 @@
                       <td style="text-align: right; font-size: 12px;">
                         @for (item of inv.items; track $index) {
                           <div [style.color]="item.isReturn ? '#ff4757' : '#fff'">
-                            {{ item.isReturn ? '🔄 [مسترجع]' : '🛒' }} {{ item.name }} (<span dir="ltr">{{ item.price }}</span> د.أ)
+                            {{ item.isReturn ? '🔄 [مسترجع]' : '🛒' }} {{ item.qty ? item.qty + 'x ' : '' }}{{ item.name }} (<span dir="ltr">{{ item.price }}</span> د.أ)
                           </div>
                         }
                       </td>
